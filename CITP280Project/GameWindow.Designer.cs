@@ -1,7 +1,7 @@
 ﻿
 namespace CITP280Project
 {
-    partial class Game
+    partial class GameWindow
     {
         /// <summary>
         /// Required designer variable.
@@ -57,9 +57,9 @@ namespace CITP280Project
             this.DoubleBuffered = true;
             this.Name = "Game";
             this.Text = "CITP 280 Project";
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Game_KeyDown);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Game_KeyUp);
-            this.Resize += new System.EventHandler(this.Game_Resize);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.GameWindow_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.GameWindow_KeyUp);
+            this.Resize += new System.EventHandler(this.GameWindow_Resize);
             this.ResumeLayout(false);
             this.PerformLayout();
 

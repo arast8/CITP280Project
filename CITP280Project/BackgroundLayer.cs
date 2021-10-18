@@ -14,35 +14,19 @@ namespace CITP280Project
     {
         private int tileSize = 80; // pixels per tile
         public CartesianRect visibleArea;
-        Dictionary<Point, Chunk> chunks;
+        private World world;
 
-        public BackgroundLayer(Dictionary<Point, Chunk> chunks, Character character, int width, int height)
-            : base(character, width, height)
+        public BackgroundLayer(World world , Player player, int width, int height)
+            : base(player, width, height)
         {
-            this.chunks = chunks;
-            character.Move += Character_Move;
-        }
-
-        public override void Resize(int width, int height)
-        {
-            base.Resize(width, height);
-
-            visibleArea.Width = (double)width / tileSize;
-            visibleArea.Height = (double)height / tileSize;
-            visibleArea.X = character.Location.X - visibleArea.Width / 2;
-            visibleArea.Y = character.Location.Y - visibleArea.Height / 2;
-        }
-
-        private void Character_Move(object sender, EventArgs e)
-        {
-            visibleArea.X = character.Location.X - visibleArea.Width / 2;
-            visibleArea.Y = character.Location.Y - visibleArea.Height / 2;
+            this.world = world;
+            player.Moved += Player_Moved;
         }
 
         public override Bitmap Draw()
         {
             int worldX, worldY, imageX, imageY;
-            Tile tile;
+            Material material;
 
             Point worldStart = new Point();
             Point imageStart = new Point();
@@ -59,13 +43,29 @@ namespace CITP280Project
             {
                 for (worldX = worldStart.X, imageX = imageStart.X; imageX < CurrentImage.Width; worldX++, imageX += tileSize)
                 {
-                    tile = WorldMap.GetTile(chunks, worldX, worldY);
+                    material = world.GetMaterial(worldX, worldY);
 
-                    graphics.DrawImage(tile.CurrentImage, imageX, imageY, tileSize, tileSize);
+                    graphics.DrawImage(material.CurrentImage, imageX, imageY, tileSize, tileSize);
                 }
             }
 
             return CurrentImage;
+        }
+
+        public override void Resize(int width, int height)
+        {
+            base.Resize(width, height);
+
+            visibleArea.Width = (double)width / tileSize;
+            visibleArea.Height = (double)height / tileSize;
+            visibleArea.X = player.Location.X - visibleArea.Width / 2;
+            visibleArea.Y = player.Location.Y - visibleArea.Height / 2;
+        }
+
+        private void Player_Moved(object sender, EventArgs e)
+        {
+            visibleArea.X = player.Location.X - visibleArea.Width / 2;
+            visibleArea.Y = player.Location.Y - visibleArea.Height / 2;
         }
     }
 }

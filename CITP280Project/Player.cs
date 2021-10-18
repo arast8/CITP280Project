@@ -13,33 +13,37 @@ namespace CITP280Project
     /// <summary>
     /// Represents a person in the game world.
     /// </summary>
-    public class Character : IDrawable
+    public class Player : IDrawable
     {
+        private Bitmap imgFacingRight;
+        private Bitmap imgFacingLeft;
         private double moveSpeed = 2; // tiles per second
-        private Vector vector;
         private DateTime lastMoveTime;
+        private bool isMoving;
+
+        // Declared here only for performance
         private TimeSpan delta;
         private DateTime now;
         private double moveDistance;
-        public bool isMoving;
-        private Bitmap facingRight;
-        private Bitmap facingLeft;
+        private Vector vector;
+        private double vertical;
+        private double horizontal;
 
-        public event EventHandler<EventArgs> Move;
+        public string Name { get; set; }
         public Point Location { get; private set; } = new Point(0, 0);
         public Bitmap CurrentImage { get; private set; }
-        public string Name { get; set; }
         public double CurrentHunger { get; private set; } = 0.75;
 
-        public Character(string name)
+        public event EventHandler<EventArgs> Moved;
+
+        public Player(string name)
         {
             Name = name;
 
-            facingRight = Properties.Resources.Character;
-            facingLeft = (Bitmap)facingRight.Clone();
-            facingLeft.RotateFlip(RotateFlipType.RotateNoneFlipX);
+            imgFacingLeft = Images.PlayerFacingLeft;
+            imgFacingRight = Images.PlayerFacingRight;
 
-            CurrentImage = facingRight;
+            CurrentImage = imgFacingRight;
         }
 
         public void StartMove()
@@ -58,10 +62,10 @@ namespace CITP280Project
         }
 
         /// <summary>
-        /// If the character is moving, calculates how far they should have traveled since the last call
-        /// and moves the character by that amount, also invoking the Move event.
+        /// If the player is moving, calculates how far they should have traveled since the last call
+        /// and moves the player by that amount, also invoking the Moved event.
         /// </summary>
-        public void KeyboardMove()
+        public void Move()
         {
             if (isMoving)
             {
@@ -70,8 +74,8 @@ namespace CITP280Project
                 if (lastMoveTime != default)
                     moveDistance = moveSpeed * delta.TotalSeconds;
 
-                double vertical = 0;
-                double horizontal = 0;
+                vertical = 0;
+                horizontal = 0;
 
                 if (IsKeyDown(KeyMap.Up))
                     vertical += moveDistance;
@@ -89,12 +93,12 @@ namespace CITP280Project
                 Location += vector;
 
                 if (vector.X > 0)
-                    CurrentImage = facingRight;
+                    CurrentImage = imgFacingRight;
                 else if (vector.X < 0)
-                    CurrentImage = facingLeft;
+                    CurrentImage = imgFacingLeft;
 
                 lastMoveTime = now;
-                Move?.Invoke(this, new EventArgs());
+                Moved?.Invoke(this, new EventArgs());
             }
         }
     }

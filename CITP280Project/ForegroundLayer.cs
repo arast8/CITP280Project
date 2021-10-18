@@ -12,18 +12,18 @@ namespace CITP280Project
     /// </summary>
     public class ForegroundLayer : Layer
     {
-        private int characterSize = 80;
+        private int playerSize = 80;
 
-        public ForegroundLayer(Character character, int width, int height) : base(character, width, height)
+        public ForegroundLayer(Player player, int width, int height) : base(player, width, height)
         { }
 
         public override Bitmap Draw()
         {
-            int imageX = Convert.ToInt32(CurrentImage.Width / 2.0 - characterSize / 2.0);
-            int imageY = Convert.ToInt32(CurrentImage.Height / 2.0 - characterSize / 2.0);
+            int imageX = Convert.ToInt32(CurrentImage.Width / 2.0 - playerSize / 2.0);
+            int imageY = Convert.ToInt32(CurrentImage.Height / 2.0 - playerSize / 2.0);
 
             graphics.Clear(Color.Transparent);
-            graphics.DrawImage(character.CurrentImage, imageX, imageY, characterSize, characterSize);
+            graphics.DrawImage(player.CurrentImage, imageX, imageY, playerSize, playerSize);
 
             return CurrentImage;
         }

@@ -13,22 +13,22 @@ namespace CITP280Project
     public abstract class Layer : IDrawable
     {
         protected Graphics graphics;
-        protected Character character;
+        protected Player player;
 
         public Bitmap CurrentImage { get; protected set; }
 
-        public Layer(Character character, int width, int height)
+        public Layer(Player player, int width, int height)
         {
-            this.character = character;
+            this.player = player;
             Resize(width, height);
         }
+
+        public abstract Bitmap Draw();
 
         public virtual void Resize(int width, int height)
         {
             CurrentImage = new Bitmap(width, height);
             graphics = Graphics.FromImage(CurrentImage);
         }
-
-        public abstract Bitmap Draw();
     }
 }

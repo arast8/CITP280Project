@@ -7,25 +7,25 @@ using System.Threading.Tasks;
 
 namespace CITP280Project
 {
-    public class Chunk
+    public class Zone
     {
         /// <summary>
         /// Represents a group of Tiles. It might make Tiles easier to handle
         /// when implementing a way of saving and loading them, but I'm not sure yet.
         /// </summary>
-        public const int ChunkSize = 16;
-        public Point Location;
-        public readonly Tile[,] Tiles = new Tile[ChunkSize, ChunkSize];
+        public const int ZoneSize = 32;
+        public Point Location { get; }
+        public Material[,] Tiles { get; } = new Material[ZoneSize, ZoneSize];
 
-        public Chunk(Point location)
+        public Zone(Point location)
         {
-            if (location.X % ChunkSize == 0 && location.Y % ChunkSize == 0)
+            if (location.X % ZoneSize == 0 && location.Y % ZoneSize == 0)
             {
                 Location = location;
 
-                for (int i = 0; i < ChunkSize; i++)
-                    for (int j = 0; j < ChunkSize; j++)
-                        Tiles[i, j] = new Tile(Properties.Resources.Dirt, new Point(Location.X + i, Location.Y + j), true);
+                for (int i = 0; i < ZoneSize; i++)
+                    for (int j = 0; j < ZoneSize; j++)
+                        Tiles[i, j] = Material.Dirt;
             }
             else
             {

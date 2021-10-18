@@ -16,7 +16,7 @@ namespace CITP280Project
         private Font uiFont;
         private StringFormat centeredStringFormat;
 
-        public UILayer(Character character, int width, int height) : base(character, width, height)
+        public UILayer(Player player, int width, int height) : base(player, width, height)
         {
             uiFont = new Font(FontFamily.GenericSansSerif, 12);
             centeredStringFormat = new StringFormat()
@@ -24,16 +24,6 @@ namespace CITP280Project
                 Alignment = StringAlignment.Center,
                 LineAlignment = StringAlignment.Center,
             };
-        }
-
-        public override void Resize(int width, int height)
-        {
-            base.Resize(width, height);
-
-            hungerBarRect.Width = 200;
-            hungerBarRect.Height = 25;
-            hungerBarRect.X = Convert.ToInt32(width * 0.1);
-            hungerBarRect.Y = Convert.ToInt32(height * 0.9 - hungerBarRect.Height);
         }
 
         public override Bitmap Draw()
@@ -45,12 +35,22 @@ namespace CITP280Project
             graphics.FillRectangle(Brushes.SaddleBrown,
                 hungerBarRect.X,
                 hungerBarRect.Y,
-                Convert.ToInt32(hungerBarRect.Width * character.CurrentHunger),
+                Convert.ToInt32(hungerBarRect.Width * player.CurrentHunger),
                 hungerBarRect.Height);
             graphics.DrawRectangle(Pens.Black, hungerBarRect);
             graphics.DrawString("Hunger", uiFont, Brushes.Black, hungerBarRect, centeredStringFormat);
 
             return CurrentImage;
+        }
+
+        public override void Resize(int width, int height)
+        {
+            base.Resize(width, height);
+
+            hungerBarRect.Width = 200;
+            hungerBarRect.Height = 25;
+            hungerBarRect.X = Convert.ToInt32(width * 0.1);
+            hungerBarRect.Y = Convert.ToInt32(height * 0.9 - hungerBarRect.Height);
         }
     }
 }
