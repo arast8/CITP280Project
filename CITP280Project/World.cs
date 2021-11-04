@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace CITP280Project
 {
+    /// <summary>
+    /// Represents a simulated game world.
+    /// </summary>
     public class World
     {
         private Player player;
@@ -46,13 +49,25 @@ namespace CITP280Project
             }
         }
 
-        public Material GetMaterial(int x, int y)
+        /// <summary>
+        /// Returns the Material of the ground at the specified x and y coordinates.
+        /// </summary>
+        public Material GetGroundMaterial(int x, int y)
         {
             var zone = GetZone(x, y);
-            return zone.Tiles[x - zone.Location.X, y - zone.Location.Y];
+            return zone.Ground[x - zone.Location.X, y - zone.Location.Y];
         }
 
-        public Material GetMaterial(Point location) => GetMaterial(location.X, location.Y);
-        public Material GetMaterial(float x, float y) => GetMaterial(Convert.ToInt32(Math.Floor(x)), Convert.ToInt32(Math.Floor(y)));
+        public Material GetGroundMaterial(Point location) => GetGroundMaterial(location.X, location.Y);
+        public Material GetGroundMaterial(float x, float y) => GetGroundMaterial(Convert.ToInt32(Math.Floor(x)), Convert.ToInt32(Math.Floor(y)));
+
+        /// <summary>
+        /// Returns the Material above the ground at the specified x and y coordinates.
+        /// </summary>
+        public Material GetPlayerLevelMaterial(int x, int y)
+        {
+            var zone = GetZone(x, y);
+            return zone.PlayerLevel[x - zone.Location.X, y - zone.Location.Y];
+        }
     }
 }

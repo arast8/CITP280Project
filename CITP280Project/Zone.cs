@@ -7,15 +7,18 @@ using System.Threading.Tasks;
 
 namespace CITP280Project
 {
+    /// <summary>
+    /// Represents a 16x16 unit area of a World.
+    /// </summary>
     public class Zone
     {
-        /// <summary>
-        /// Represents a group of Tiles. It might make Tiles easier to handle
-        /// when implementing a way of saving and loading them, but I'm not sure yet.
-        /// </summary>
-        public const int ZoneSize = 32;
+        public const int ZoneSize = 16;
+        private static Random rng;
+
         public Point Location { get; }
-        public Material[,] Tiles { get; } = new Material[ZoneSize, ZoneSize];
+        public Material[,] Ground { get; } = new Material[ZoneSize, ZoneSize];
+        public Material[,] PlayerLevel { get; } = new Material[ZoneSize, ZoneSize];
+        public Biome Biome { get; private set; }
 
         public Zone(Point location)
         {
@@ -23,13 +26,57 @@ namespace CITP280Project
             {
                 Location = location;
 
-                for (int i = 0; i < ZoneSize; i++)
-                    for (int j = 0; j < ZoneSize; j++)
-                        Tiles[i, j] = Material.Dirt;
+                rng = new Random();
+                var biomeNumber = rng.Next(5);
+
+                if (biomeNumber < 3)
+                    InitGrassBiome();
+                else
+                    InitStoneBiome();
             }
             else
             {
                 throw new Exception("Invalid chunk location: " + location);
+            }
+        }
+
+        /// <summary>
+        /// Sets all of Ground to Grass.
+        /// 1/20 chance of inserting Wheat at a location in PlayerLevel.
+        /// </summary>
+        private void InitGrassBiome()
+        {
+            Biome = Biome.Grass;
+
+            for (int i = 0; i<ZoneSize; i++)
+            {
+                for (int j = 0; j<ZoneSize; j++)
+                {
+                    Ground[i, j] = Material.Grass;
+
+                    if (rng.Next(20) == 0)
+                        PlayerLevel[i, j] = Material.Wheat;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets all of Ground to Stone.
+        /// 1/20 chance of inserting StoneFlower at a location in PlayerLevel.
+        /// </summary>
+        private void InitStoneBiome()
+        {
+            Biome = Biome.Stone;
+
+            for (int i = 0; i < ZoneSize; i++)
+            {
+                for (int j = 0; j < ZoneSize; j++)
+                {
+                    Ground[i, j] = Material.Stone;
+
+                    if (rng.Next(20) == 0)
+                        PlayerLevel[i, j] = Material.StoneFlower;
+                }
             }
         }
     }

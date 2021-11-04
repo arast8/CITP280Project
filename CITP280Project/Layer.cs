@@ -8,27 +8,17 @@ using System.Threading.Tasks;
 namespace CITP280Project
 {
     /// <summary>
-    /// Layers are responsible for rendering a group of game visuals.
+    /// Layers are responsible for drawing a group of game visuals onto a worldView.
     /// </summary>
-    public abstract class Layer : IDrawable
+    public abstract class Layer
     {
-        protected Graphics graphics;
-        protected Player player;
+        protected WorldView worldView;
 
-        public Bitmap CurrentImage { get; protected set; }
-
-        public Layer(Player player, int width, int height)
+        public Layer(WorldView worldView)
         {
-            this.player = player;
-            Resize(width, height);
+            this.worldView = worldView;
         }
 
-        public abstract Bitmap Draw();
-
-        public virtual void Resize(int width, int height)
-        {
-            CurrentImage = new Bitmap(width, height);
-            graphics = Graphics.FromImage(CurrentImage);
-        }
+        public abstract void Draw();
     }
 }

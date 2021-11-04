@@ -14,8 +14,8 @@ namespace CITP280Project
 {
     /// <summary>
     /// The main game window. It runs a timer that triggers game events to happen every few milliseconds.
-    /// It causes layers to be redrawn, combined, and drawn to the window.
-    /// It also responds to keypresses by telling the character to move.
+    /// It sets up the relationships between a World, Player, and WorldView object, and asks WorldView for images to draw to the window.
+    /// It also responds to keypresses by telling the Player to start or stop moving.
     /// </summary>
     public partial class GameWindow : Form
     {
@@ -26,11 +26,53 @@ namespace CITP280Project
         public GameWindow()
         {
             InitializeComponent();
-            Images.Initialize(out var e);
+
+            lblLoading.Text = $"Loading {Images.COUNT} Images...";
+
+            Images.Initialize();
+
+            lblLoading.Text = $"Loaded {Images.Successes}/{Images.COUNT} Images.";
+
+            if (Images.Errors == 0)
+            {
+                btnStart.BackColor = Color.FromArgb(0, 255, 0);
+            }
+            else
+            {
+                lblLoading.Text += $" There were {Images.Errors} errors.";
+                btnStart.BackColor = Color.FromArgb(255, 255, 0);
+            }
+
             Material.Initialize();
+        }
+
+        private void GameWindow_Layout(object sender, LayoutEventArgs e)
+        {
+            var margin = 8;
+
+            lblLoading.Location = new Point(margin, (pnlMenu.Height - lblLoading.Height) / 2);
+            lblLoading.Width = pnlMenu.Width - margin * 2;
+
+            btnStart.Location = new Point((pnlMenu.Width - btnStart.Width) / 2, pnlMenu.Bottom - margin - btnStart.Height);
+        }
+
+        private void GameWindow_Resize(object sender, EventArgs e)
+        {
+            if (ClientRectangle.Width > 0 && ClientRectangle.Height > 0)
+                worldView.Resize(ClientRectangle.Width, ClientRectangle.Height);
+        }
+
+        /// <summary>
+        /// Starts the game.
+        /// </summary>
+        private void btnStart_Click(object sender, EventArgs e)
+        {
+            pnlMenu.Hide();
+            Focus();
+            lblDebug.Show();
 
             world = new World();
-            player = world.CreatePlayer("test character");
+            player = world.CreatePlayer("test player");
             worldView = new WorldView(world, player, ClientRectangle.Width, ClientRectangle.Height);
 
             timerTick.Start();
@@ -47,15 +89,8 @@ namespace CITP280Project
 
             CreateGraphics().DrawImage(worldView.GetImage(), Point.Empty);
 
-            //lblDebug.Text = "View Area: " + ((BackgroundLayer)layers[0]).visibleArea;
-        }
-
-        /// <summary>
-        /// Resizes the WorldView.
-        /// </summary>
-        private void GameWindow_Resize(object sender, EventArgs e)
-        {
-            worldView.Resize(ClientRectangle.Width, ClientRectangle.Height);
+            lblDebug.Text = "View Area: " + worldView.VisibleArea +
+                "\nCursor: " + worldView.ToWorldLocation(PointToClient(System.Windows.Forms.Cursor.Position));
         }
 
         private void GameWindow_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)

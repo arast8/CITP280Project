@@ -14,7 +14,6 @@ namespace CITP280Project
         /// <summary>
         /// Rounds a number down to the nearest multiple of another number.
         /// </summary>
-        /// <returns></returns>
         public static int Floor(double value, int multiple)
         {
             int roundedValue = Convert.ToInt32((int)(value / multiple) * multiple);

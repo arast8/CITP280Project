@@ -17,7 +17,7 @@ namespace CITP280Project
     {
         private Bitmap imgFacingRight;
         private Bitmap imgFacingLeft;
-        private double moveSpeed = 2; // tiles per second
+        private double moveSpeed = 4; // tiles per second
         private DateTime lastMoveTime;
         private bool isMoving;
 
@@ -44,6 +44,9 @@ namespace CITP280Project
             imgFacingRight = Images.PlayerFacingRight;
 
             CurrentImage = imgFacingRight;
+
+            var rng = new Random();
+            Location = new Point(rng.NextDouble(-16, 16), rng.NextDouble(-16, 16));
         }
 
         public void StartMove()

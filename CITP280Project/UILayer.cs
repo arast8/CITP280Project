@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace CITP280Project
 {
     /// <summary>
-    /// Renders UI elements, which should be shown above all game objects. Currently it only draws a hunger bar.
+    /// Draws UI elements.
     /// </summary>
     public class UILayer : Layer
     {
@@ -16,7 +16,7 @@ namespace CITP280Project
         private Font uiFont;
         private StringFormat centeredStringFormat;
 
-        public UILayer(Player player, int width, int height) : base(player, width, height)
+        public UILayer(WorldView worldView) : base(worldView)
         {
             uiFont = new Font(FontFamily.GenericSansSerif, 12);
             centeredStringFormat = new StringFormat()
@@ -26,9 +26,15 @@ namespace CITP280Project
             };
         }
 
-        public override Bitmap Draw()
+        public override void Draw()
         {
-            graphics.Clear(Color.Transparent);
+            Graphics graphics = worldView.Graphics;
+            Player player = worldView.Player;
+
+            hungerBarRect.Width = 200;
+            hungerBarRect.Height = 25;
+            hungerBarRect.X = Convert.ToInt32(graphics.VisibleClipBounds.Width * 0.1);
+            hungerBarRect.Y = Convert.ToInt32(graphics.VisibleClipBounds.Height * 0.9 - hungerBarRect.Height);
 
             // Draw hunger bar
             graphics.FillRectangle(Brushes.White, hungerBarRect);
@@ -39,18 +45,6 @@ namespace CITP280Project
                 hungerBarRect.Height);
             graphics.DrawRectangle(Pens.Black, hungerBarRect);
             graphics.DrawString("Hunger", uiFont, Brushes.Black, hungerBarRect, centeredStringFormat);
-
-            return CurrentImage;
-        }
-
-        public override void Resize(int width, int height)
-        {
-            base.Resize(width, height);
-
-            hungerBarRect.Width = 200;
-            hungerBarRect.Height = 25;
-            hungerBarRect.X = Convert.ToInt32(width * 0.1);
-            hungerBarRect.Y = Convert.ToInt32(height * 0.9 - hungerBarRect.Height);
         }
     }
 }

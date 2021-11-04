@@ -50,9 +50,11 @@
   <ItemGroup>
     <Compile Include="BackgroundLayer.cs" />
     <Compile Include="CartesianRect.cs" />
+    <Compile Include="Biome.cs" />
     <Compile Include="Images.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Material.cs" />
+    <Compile Include="RandomExtensions.cs" />
     <Compile Include="Zone.cs" />
     <Compile Include="ForegroundLayer.cs" />
     <Compile Include="Layer.cs" />
@@ -95,12 +97,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\dirt.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Character.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
