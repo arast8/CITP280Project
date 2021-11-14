@@ -92,11 +92,12 @@ namespace CITP280Project
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.pnlMenu);
             this.Controls.Add(this.lblDebug);
+            this.Controls.Add(this.pnlMenu);
             this.DoubleBuffered = true;
             this.Name = "GameWindow";
             this.Text = "CITP 280 Project";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GameWindow_FormClosing);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.GameWindow_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.GameWindow_KeyUp);
             this.Layout += new System.Windows.Forms.LayoutEventHandler(this.GameWindow_Layout);

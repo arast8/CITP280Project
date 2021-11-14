@@ -15,6 +15,7 @@ namespace CITP280Project
         public static Material StoneFlower { get; private set; }
         public static Material Grass { get; private set; }
         public static Material Wheat { get; private set; }
+
         public string Name { get; private set; }
         public Bitmap CurrentImage { get; private set; }
 
@@ -35,6 +36,17 @@ namespace CITP280Project
             StoneFlower = new Material("StoneFlower", Images.StoneFlower);
             Grass = new Material("Grass", Images.Grass);
             Wheat = new Material("Wheat", Images.Wheat);
+        }
+
+        public static Material GetMaterial(string name)
+        {
+            if (name == null) return null;
+            if (name == Dirt.Name) return Dirt;
+            if (name == Stone.Name) return Stone;
+            if (name == StoneFlower.Name) return StoneFlower;
+            if (name == Grass.Name) return Grass;
+            if (name == Wheat.Name) return Wheat;
+            else return Unknown;
         }
     }
 }

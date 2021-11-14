@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Data.Sqlite;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +17,24 @@ namespace CITP280Project
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new GameWindow());
+
+            var gameWindow = new GameWindow();
+
+            try
+            {
+                Application.Run(gameWindow);
+            }
+            catch (SqliteException ex)
+            {
+                gameWindow.TryDisposeWorld(false);
+
+                MessageBox.Show(
+                    "The program encountered a database error and must close.\n Exception: " + ex.Message,
+                    "CITP 280 Project",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+
+            }
         }
     }
 }

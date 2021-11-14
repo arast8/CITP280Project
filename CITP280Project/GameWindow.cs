@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Data.Sqlite;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,6 +10,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using static System.Windows.Input.Keyboard;
+using Point = System.Drawing.Point;
+using PointD = System.Windows.Point;
 
 namespace CITP280Project
 {
@@ -50,10 +53,14 @@ namespace CITP280Project
         {
             var margin = 8;
 
-            lblLoading.Location = new Point(margin, (pnlMenu.Height - lblLoading.Height) / 2);
             lblLoading.Width = pnlMenu.Width - margin * 2;
+            lblLoading.Location = new Point(
+                margin,
+                (pnlMenu.Height - lblLoading.Height) / 2);
 
-            btnStart.Location = new Point((pnlMenu.Width - btnStart.Width) / 2, pnlMenu.Bottom - margin - btnStart.Height);
+            btnStart.Location = new Point(
+                (pnlMenu.Width - btnStart.Width) / 2,
+                pnlMenu.Bottom - margin - btnStart.Height);
         }
 
         private void GameWindow_Resize(object sender, EventArgs e)
@@ -71,7 +78,7 @@ namespace CITP280Project
             Focus();
             lblDebug.Show();
 
-            world = new World();
+            world = new World("test world");
             player = world.CreatePlayer("test player");
             worldView = new WorldView(world, player, ClientRectangle.Width, ClientRectangle.Height);
 
@@ -79,9 +86,8 @@ namespace CITP280Project
         }
 
         /// <summary>
-        /// Triggers regular processing activities, which include:
-        /// Starting or stopping character movement
-        /// Drawign the result of worldView.GetImage() to the window.
+        /// Triggers regular processing activities, which include
+        /// drawing the result of worldView.GetImage() to the window.
         /// </summary>
         private void timerTick_Tick(object sender, EventArgs e)
         {
@@ -89,8 +95,10 @@ namespace CITP280Project
 
             CreateGraphics().DrawImage(worldView.GetImage(), Point.Empty);
 
+            var cursorLocation = worldView.ToWorldLocation(PointToClient(System.Windows.Forms.Cursor.Position));
+
             lblDebug.Text = "View Area: " + worldView.VisibleArea +
-                "\nCursor: " + worldView.ToWorldLocation(PointToClient(System.Windows.Forms.Cursor.Position));
+                $"\nCursor: {{ {cursorLocation.X:F}, {cursorLocation.Y:F} }}";
         }
 
         private void GameWindow_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
@@ -110,6 +118,35 @@ namespace CITP280Project
                 player.StopMove();
 
                 e.Handled = true;
+            }
+        }
+
+        private void GameWindow_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            TryDisposeWorld(true);
+        }
+
+        /// <summary>
+        /// Tries to call Dispose() on the current world. If there is a database error and complain is true,
+        /// show a MessageBox describing the error.
+        /// </summary>
+        /// <param name="complain">Whether to show a MessageBox if there is a database error</param>
+        public void TryDisposeWorld(bool complain)
+        {
+            try
+            {
+                world?.Dispose();
+            }
+            catch (SqliteException ex)
+            {
+                if (complain)
+                {
+                    MessageBox.Show(
+                    "The program encountered a database error while closing.\n Exception: " + ex.Message,
+                    "CITP 280 Project",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                }
             }
         }
     }

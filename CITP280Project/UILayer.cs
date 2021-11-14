@@ -41,7 +41,7 @@ namespace CITP280Project
             graphics.FillRectangle(Brushes.SaddleBrown,
                 hungerBarRect.X,
                 hungerBarRect.Y,
-                Convert.ToInt32(hungerBarRect.Width * player.CurrentHunger),
+                Convert.ToInt32(hungerBarRect.Width * player.Hunger),
                 hungerBarRect.Height);
             graphics.DrawRectangle(Pens.Black, hungerBarRect);
             graphics.DrawString("Hunger", uiFont, Brushes.Black, hungerBarRect, centeredStringFormat);

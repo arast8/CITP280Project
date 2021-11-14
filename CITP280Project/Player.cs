@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using static System.Windows.Input.Keyboard;
 using System.Windows;
 using System.Drawing;
-using Point = System.Windows.Point;
+using PointD = System.Windows.Point;
 
 namespace CITP280Project
 {
@@ -30,23 +30,32 @@ namespace CITP280Project
         private double horizontal;
 
         public string Name { get; set; }
-        public Point Location { get; private set; } = new Point(0, 0);
+        public PointD Location { get; set; } = new PointD(0, 0);
         public Bitmap CurrentImage { get; private set; }
-        public double CurrentHunger { get; private set; } = 0.75;
+        public double Hunger { get; set; } = 0.75;
 
         public event EventHandler<EventArgs> Moved;
 
-        public Player(string name)
+        public Player()
+        {
+            imgFacingLeft = Images.PlayerFacingLeft;
+            imgFacingRight = Images.PlayerFacingRight;
+            CurrentImage = imgFacingRight;
+        }
+
+        public Player(string name) : this()
         {
             Name = name;
 
-            imgFacingLeft = Images.PlayerFacingLeft;
-            imgFacingRight = Images.PlayerFacingRight;
-
-            CurrentImage = imgFacingRight;
-
             var rng = new Random();
-            Location = new Point(rng.NextDouble(-16, 16), rng.NextDouble(-16, 16));
+            Location = new PointD(rng.NextDouble(-16, 16), rng.NextDouble(-16, 16));
+        }
+
+        public Player(string name, PointD location, double hunger) : this()
+        {
+            Name = name;
+            Location = location;
+            Hunger = hunger;
         }
 
         public void StartMove()

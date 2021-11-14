@@ -4,6 +4,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Point = System.Drawing.Point;
+using PointD = System.Windows.Point;
 
 namespace CITP280Project
 {
@@ -69,14 +71,14 @@ namespace CITP280Project
             visibleArea.Y = Player.Location.Y - visibleArea.Height / 2;
         }
 
-        public PointF ToWorldLocation(Point screenLocation)
+        /// <summary>
+        /// Converts coordinates on GameWindow to World coordinates.
+        /// </summary>
+        public PointD ToWorldLocation(Point locationOnWindow)
         {
-            var worldLocation = new PointF();
-
-            worldLocation.X = Convert.ToSingle(visibleArea.Left + screenLocation.X / (double)TileSize);
-            worldLocation.Y = Convert.ToSingle(visibleArea.Top - screenLocation.Y / (double)TileSize);
-
-            return worldLocation;
+            return new PointD(
+                visibleArea.Left + locationOnWindow.X / (double)TileSize,
+                visibleArea.Top - locationOnWindow.Y / (double)TileSize);
         }
     }
 }

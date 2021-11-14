@@ -8,6 +8,7 @@ namespace CITP280Project
 {
     public enum Biome
     {
+        Unknown,
         Grass,
         Stone,
     }

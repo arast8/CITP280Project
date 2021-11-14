@@ -1,12 +1,16 @@
 # Andrew Rast's CITP 280 project
 
-## Description:
+## Description
 This is a game in which the player moves a character across a flat, two-dimensional world.
+However, it is very unfinished.
 I plan for it to be a farming game where you search for different plants to grow, but the only thing you can do so far is move around.
-I haven't come up with a good name for my project yet, so I just called it CITP 280 Project.
 
-## Changelog:
-### Part 1 Implementation Submission:
+## Instructions
+After starting the program, click the start button to load the world named "test world" and the player named "test player".
+Use the W, S, A, and D keys to move the player.
+
+## Changelog
+### 1.0 (Part 1 Implementation Submission)
 The game window is a Windows Form. It has a timer calling a method every few milliseconds.
 That method tells the character to move and draws an updated image of the game world to the window.
 The inheritance hierarchy requirement for part 1 is met by the Layer inheritance hierarchy.
@@ -15,7 +19,7 @@ The polymorphism requirment is implemented in the Draw() method of the Game clas
 Game.Draw() iterates over an array of Layers and calls Draw() on each of them, which causes it to update and return an image of itself.
 BackgroundLayer.Draw() draws a grid of Tiles, which is the ground of the game world, ForegroundLayer.Draw() draws the character, and UILayer.Draw() draws a hunger bar.
 
-### Part 2 UML Diagram Submission:
+### 2.0 (Part 2 UML Diagram Submission)
 * Rename Game to GameWindow.
 * Rename Character to Player.
 * Rename Player's Move event to Moved and the KeyboardMove method to Move.
@@ -26,7 +30,7 @@ BackgroundLayer.Draw() draws a grid of Tiles, which is the ground of the game wo
 * Replace Tile with Material. Material has no Location property and stores instances of itself in static properties. Zones contain many references to the same Material objects.
 * GameWindow's constructor calls Images.Initialize() and Material.Initialize() to initialize the game's images and Material objects.
 
-### Part 2 Implementation Submission:
+### 2.1 (Part 2 Implementation Submission)
 * Read image files in Images.Initialize() instead of using project's resource file.
 	* The file reading is actually implemented in Images.TryGetBitmap(), which Initialize() calls.
 	* Remove images from the project's resource file.
@@ -51,3 +55,26 @@ BackgroundLayer.Draw() draws a grid of Tiles, which is the ground of the game wo
 * Add Biome enumeration and add a Biome property to Zone
 * In the Zone constructor, choose a random Biome and call the relevant method for setting it up. The Grass Biome has Grass as the ground with a chance of Wheat in PlayerLevel, and the Stone Biome has Stone as the ground with a chance of StoneFlower in PlayerLevel.
 * Prevent crashing when the GameWindow is resized and the client area height is 0.
+
+### 3.0
+* Save and load Worlds to and from an SQLite database.
+	* Uses the Microsoft.Data.Sqlite NuGet package.
+	* World.OpenDB() opens/creates the SQLite database. It saves the connection in a private property until the World is disposed.
+	* Add many methods starting with "DB" to interact with the database.
+	* Put SQL commands in string constants in the World class, and use placeholders for parameters.
+	* Add World.Save(), which saves the world's state to the database.
+	* Make World implement IDisposable. Dispose() tries to call Save() and always closes the database connection.
+	* Add a Name property to World, and require it be passed to the constructor. It is used in the database file name.
+	* Handle database errors in the Main method of Program.
+* Add a FormClosing event handler to GameWindow, which tries to call World.Dispose();
+* Throughout the program, use Point to refer to System.Drawing.Point and PointD to refer to System.Windows.Point. The distinction is important, because System.Drawing.Point uses int for its coordinates and System.Windows.Point uses double for its coordinates.
+* Add World.UnloadFarZones(), which uses LINQ to remove Zones from World.zones that are far away from the player.
+	* Add MathHelper.Distance(), which calculates the distance between two points and accepts any combination of Point and PointD.
+* Add a timer to World (saveTimer) that calls Save() and UnloadFarZones() every ten seconds.
+* Add Unknown to the Biome enumeration, which is used in World.DBTryGetZone() if a Biome name saved to the database doesn't match any other Biome.
+* Add Material.GetMaterial(), which returns the instance of Material with the given name.
+* Rename Player.CurrentHunger to Player.Hunger.
+* Add a default Player constructor and a Player constructor that takes name, location, and hunger parameters. The latter is used when reading a Player from the database.
+* Add a 2D array of booleans to Zone (Zone.Changed), which will keep track of which locations have been changed since they were last saved to the database.
+* Delay filling Zones with random Materials from the Zone constructor to a call to Zone.Init(). This allows the functionality to be skipped when loading from the database.
+* Make WorldView.ToWorldLocation() return PointD instead of PointF. Also round the coordinates in GameWindow.timerTick_Tick() when writing them to lblDebug.

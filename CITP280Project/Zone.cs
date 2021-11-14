@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PointD = System.Windows.Point;
 
 namespace CITP280Project
 {
@@ -18,26 +19,30 @@ namespace CITP280Project
         public Point Location { get; }
         public Material[,] Ground { get; } = new Material[ZoneSize, ZoneSize];
         public Material[,] PlayerLevel { get; } = new Material[ZoneSize, ZoneSize];
-        public Biome Biome { get; private set; }
+        public bool[,] Changed { get; } = new bool[ZoneSize, ZoneSize];
+        public Biome Biome { get; set; }
+        public PointD Center { get => new PointD(Location.X + ZoneSize / 2.0, Location.Y + ZoneSize / 2.0); }
 
         public Zone(Point location)
         {
             if (location.X % ZoneSize == 0 && location.Y % ZoneSize == 0)
-            {
                 Location = location;
-
-                rng = new Random();
-                var biomeNumber = rng.Next(5);
-
-                if (biomeNumber < 3)
-                    InitGrassBiome();
-                else
-                    InitStoneBiome();
-            }
             else
-            {
                 throw new Exception("Invalid chunk location: " + location);
-            }
+        }
+
+        /// <summary>
+        /// Initializes this Zone with Materials of a random biome.
+        /// </summary>
+        public void Init()
+        {
+            rng = new Random();
+            var biomeNumber = rng.Next(5);
+
+            if (biomeNumber < 3)
+                InitGrassBiome();
+            else
+                InitStoneBiome();
         }
 
         /// <summary>
