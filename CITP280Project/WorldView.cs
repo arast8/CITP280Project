@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,7 +58,8 @@ namespace CITP280Project
             Graphics?.Dispose();
             CurrentImage = new Bitmap(width, height);
             Graphics = Graphics.FromImage(CurrentImage);
-
+            Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+            Graphics.PixelOffsetMode = PixelOffsetMode.Half;
 
             visibleArea.Width = (double)width / TileSize;
             visibleArea.Height = (double)height / TileSize;

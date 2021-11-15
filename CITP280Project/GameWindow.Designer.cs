@@ -94,7 +94,6 @@ namespace CITP280Project
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.lblDebug);
             this.Controls.Add(this.pnlMenu);
-            this.DoubleBuffered = true;
             this.Name = "GameWindow";
             this.Text = "CITP 280 Project";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.GameWindow_FormClosing);

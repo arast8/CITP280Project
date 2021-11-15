@@ -25,6 +25,16 @@ namespace CITP280Project
         private World world;
         private WorldView worldView;
         private Player player;
+        private Graphics graphics;
+        private BufferedGraphics bufferedGraphics;
+
+        // FPS variables
+        private const double DATETIME_TICKS_PER_SECOND = 10_000_000;
+        private readonly long[] frameDurations = new long[10];
+        private int frameDurationsIndex;
+        private long lastFrameTime;
+        private long currentFrameTime;
+        private double fps;
 
         public GameWindow()
         {
@@ -47,6 +57,9 @@ namespace CITP280Project
             }
 
             Material.Initialize();
+
+            graphics = CreateGraphics();
+            bufferedGraphics = BufferedGraphicsManager.Current.Allocate(graphics, ClientRectangle);
         }
 
         private void GameWindow_Layout(object sender, LayoutEventArgs e)
@@ -67,6 +80,9 @@ namespace CITP280Project
         {
             if (ClientRectangle.Width > 0 && ClientRectangle.Height > 0)
                 worldView.Resize(ClientRectangle.Width, ClientRectangle.Height);
+
+            graphics = CreateGraphics();
+            bufferedGraphics = BufferedGraphicsManager.Current.Allocate(graphics, ClientRectangle);
         }
 
         /// <summary>
@@ -86,19 +102,51 @@ namespace CITP280Project
         }
 
         /// <summary>
-        /// Triggers regular processing activities, which include
-        /// drawing the result of worldView.GetImage() to the window.
+        /// Triggers the game world simulation to progress
+        /// and a frame from WorldView to be drawn to the screen.
         /// </summary>
         private void timerTick_Tick(object sender, EventArgs e)
         {
             world.timerTick_Tick();
 
-            CreateGraphics().DrawImage(worldView.GetImage(), Point.Empty);
+            DrawFrame();
+            CalculateFPS();
 
             var cursorLocation = worldView.ToWorldLocation(PointToClient(System.Windows.Forms.Cursor.Position));
 
             lblDebug.Text = "View Area: " + worldView.VisibleArea +
-                $"\nCursor: {{ {cursorLocation.X:F}, {cursorLocation.Y:F} }}";
+                $"\nCursor: {{ {cursorLocation.X:F}, {cursorLocation.Y:F} }}" +
+                $"\nFPS = {fps:0}";
+        }
+
+        /// <summary>
+        /// Draws worldView to the window.
+        /// </summary>
+        private void DrawFrame()
+        {
+            bufferedGraphics.Graphics.DrawImage(worldView.GetImage(), Point.Empty);
+            bufferedGraphics.Render(graphics);
+        }
+
+        /// <summary>
+        /// Calculates the average frames per second.
+        /// It is assumed that a frame is drawn every time this method is called.
+        /// </summary>
+        private void CalculateFPS()
+        {
+            currentFrameTime = DateTime.Now.Ticks;
+
+            if (lastFrameTime > 0)
+            {
+                frameDurations[frameDurationsIndex++] = currentFrameTime - lastFrameTime;
+
+                if (frameDurationsIndex == frameDurations.Length)
+                    frameDurationsIndex = 0;
+
+                fps = DATETIME_TICKS_PER_SECOND / frameDurations.Average();
+            }
+
+            lastFrameTime = currentFrameTime;
         }
 
         private void GameWindow_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
@@ -123,6 +171,8 @@ namespace CITP280Project
 
         private void GameWindow_FormClosing(object sender, FormClosingEventArgs e)
         {
+            graphics.Dispose();
+            bufferedGraphics.Dispose();
             TryDisposeWorld(true);
         }
 

@@ -78,3 +78,8 @@ BackgroundLayer.Draw() draws a grid of Tiles, which is the ground of the game wo
 * Add a 2D array of booleans to Zone (Zone.Changed), which will keep track of which locations have been changed since they were last saved to the database.
 * Delay filling Zones with random Materials from the Zone constructor to a call to Zone.Init(). This allows the functionality to be skipped when loading from the database.
 * Make WorldView.ToWorldLocation() return PointD instead of PointF. Also round the coordinates in GameWindow.timerTick_Tick() when writing them to lblDebug.
+
+### 3.1 (Part 3 UML Diagram and Implementation Submissions)
+* Set InterpolationMode to NearestNeighbor and PixelOffsetMode to Half on the Graphics object in WorldView.Resize(). This gets rid of the blurriness and the black grid lines.
+* Draw to a BufferedGraphics object before drawing to the GameWindow (in GameWindow.DrawFrame()). This gets rid of screen-tearing and makes the animation look a lot smoother.
+* Calculate FPS (Frames Per Second) in GameWindow.CalculateFPS() and show the result in the debug Label.
