@@ -73,7 +73,7 @@ namespace CITP280Project
             WHERE X = @x AND Y = @y";
 
         private Player player;
-        private readonly Dictionary<Point, Zone> zones = new Dictionary<Point, Zone>();
+        private readonly Dictionary<Point<int>, Zone> zones = new Dictionary<Point<int>, Zone>();
         private SqliteConnection connection;
         private Timer saveTimer = new Timer { Interval = TEN_SECONDS };
         private string worldsDirName = "Worlds";
@@ -142,12 +142,12 @@ namespace CITP280Project
         /// </summary>
         private void UnloadFarZones()
         {
-            var query = from KeyValuePair<Point, Zone> pair in zones
-                        where MathHelper.Distance(player.Location, pair.Value.Center) > ZONE_UNLOAD_DISTANCE
+            var query = from KeyValuePair<Point<int>, Zone> pair in zones
+                        where player.Location.DistanceTo(pair.Value.Center) > ZONE_UNLOAD_DISTANCE
                         select pair.Key;
 
             // Calling .toArray() on query avoids modifying the collection on which the query is executing.
-            foreach (Point location in query.ToArray())
+            foreach (Point<int> location in query.ToArray())
                 zones.Remove(location);
         }
 
@@ -162,7 +162,7 @@ namespace CITP280Project
             int zoneX = MathHelper.Floor(x, Zone.ZoneSize);
             int zoneY = MathHelper.Floor(y, Zone.ZoneSize);
 
-            var location = new Point(zoneX, zoneY);
+            var location = new Point<int>(zoneX, zoneY);
 
             if (zones.ContainsKey(location))
                 return zones[location];
@@ -193,7 +193,7 @@ namespace CITP280Project
             return zone.Ground[x - zone.Location.X, y - zone.Location.Y];
         }
 
-        public Material GetGroundMaterial(Point location) => GetGroundMaterial(location.X, location.Y);
+        public Material GetGroundMaterial(Point<int> location) => GetGroundMaterial(location.X, location.Y);
         public Material GetGroundMaterial(float x, float y) => GetGroundMaterial(Convert.ToInt32(Math.Floor(x)), Convert.ToInt32(Math.Floor(y)));
 
         /// <summary>
@@ -400,7 +400,7 @@ namespace CITP280Project
                 {
                     if (reader.Read())
                     {
-                        var location = new System.Windows.Point(
+                        var location = new Point<double>(
                             reader.GetDouble(reader.GetOrdinal("X")),
                             reader.GetDouble(reader.GetOrdinal("Y"))
                         );
@@ -426,7 +426,7 @@ namespace CITP280Project
         /// It will be null if the database does not have the Zone.</param>
         /// <returns>Whether the database has the Zone</returns>
         /// <remarks>This method does not handle errors.</remarks>
-        private bool DBTryGetZone(Point location, out Zone savedZone)
+        private bool DBTryGetZone(Point<int> location, out Zone savedZone)
         {
             bool dbHasZone;
             string biomeName = "";

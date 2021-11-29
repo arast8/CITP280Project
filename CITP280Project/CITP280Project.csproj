@@ -84,6 +84,7 @@
     <Compile Include="Images.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Material.cs" />
+    <Compile Include="Point.cs" />
     <Compile Include="RandomExtensions.cs" />
     <Compile Include="Zone.cs" />
     <Compile Include="ForegroundLayer.cs" />

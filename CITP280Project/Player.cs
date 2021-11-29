@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using static System.Windows.Input.Keyboard;
 using System.Windows;
 using System.Drawing;
-using PointD = System.Windows.Point;
 
 namespace CITP280Project
 {
@@ -25,12 +24,11 @@ namespace CITP280Project
         private TimeSpan delta;
         private DateTime now;
         private double moveDistance;
-        private Vector vector;
         private double vertical;
         private double horizontal;
 
         public string Name { get; set; }
-        public PointD Location { get; set; } = new PointD(0, 0);
+        public Point<double> Location { get; set; } = new Point<double>(0, 0);
         public Bitmap CurrentImage { get; private set; }
         public double Hunger { get; set; } = 0.75;
 
@@ -48,10 +46,10 @@ namespace CITP280Project
             Name = name;
 
             var rng = new Random();
-            Location = new PointD(rng.NextDouble(-16, 16), rng.NextDouble(-16, 16));
+            Location = new Point<double>(rng.NextDouble(-16, 16), rng.NextDouble(-16, 16));
         }
 
-        public Player(string name, PointD location, double hunger) : this()
+        public Player(string name, Point<double> location, double hunger) : this()
         {
             Name = name;
             Location = location;
@@ -101,12 +99,11 @@ namespace CITP280Project
                 if (IsKeyDown(KeyMap.Right))
                     horizontal += moveDistance;
 
-                vector = new Vector(horizontal, vertical);
-                Location += vector;
+                Location = new Point<double>(Location.X + horizontal, Location.Y + vertical);
 
-                if (vector.X > 0)
+                if (horizontal > 0)
                     CurrentImage = imgFacingRight;
-                else if (vector.X < 0)
+                else if (horizontal < 0)
                     CurrentImage = imgFacingLeft;
 
                 lastMoveTime = now;

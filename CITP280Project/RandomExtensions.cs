@@ -19,7 +19,7 @@ namespace CITP280Project
             if (upperBound < lowerBound)
                 throw new ArgumentException("upperBound cannot be smaller than lowerBound.");
 
-            double range = Math.Abs(upperBound - lowerBound);
+            double range = upperBound - lowerBound;
 
             return lowerBound + r.NextDouble() * range;
         }

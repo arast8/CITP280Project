@@ -84,3 +84,9 @@ BackgroundLayer.Draw() draws a grid of Tiles, which is the ground of the game wo
 * Set InterpolationMode to NearestNeighbor and PixelOffsetMode to Half on the Graphics object in WorldView.Resize(). This gets rid of the blurriness and the black grid lines.
 * Draw to a BufferedGraphics object before drawing to the GameWindow (in GameWindow.DrawFrame()). This gets rid of screen-tearing and makes the animation look a lot smoother.
 * Calculate FPS (Frames Per Second) in GameWindow.CalculateFPS() and show the result in the debug Label.
+
+### 4.0
+* Create the Point\<T\> struct as a generic struct that can hold X and Y coordinates of any numeric type. This replaces using System.Drawing.Point and System.Windows.Point for the most part, and should make it easy to tell what type the coordinates are.
+	* Create the PointExtensions class and its overloaded DistanceTo() extension method in the same file as Point\<T\> (Point.cs). DistanceTo() was easier to implement as extension methods than a normal method, because it depends on Point's type parameter being numeric when it can be any struct.
+	* Use Point\<T\> instead of System.Drawing.Point and System.Windows.Point for Player.Location, Zone.Location, Zone.Center, and World.zones.
+* Remove unnecessary Math.Abs() call in RandomExtensions.NextDouble().

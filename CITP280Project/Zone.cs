@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PointD = System.Windows.Point;
 
 namespace CITP280Project
 {
@@ -16,14 +15,14 @@ namespace CITP280Project
         public const int ZoneSize = 16;
         private static Random rng;
 
-        public Point Location { get; }
+        public Point<int> Location { get; }
         public Material[,] Ground { get; } = new Material[ZoneSize, ZoneSize];
         public Material[,] PlayerLevel { get; } = new Material[ZoneSize, ZoneSize];
         public bool[,] Changed { get; } = new bool[ZoneSize, ZoneSize];
         public Biome Biome { get; set; }
-        public PointD Center { get => new PointD(Location.X + ZoneSize / 2.0, Location.Y + ZoneSize / 2.0); }
+        public Point<double> Center { get => new Point<double>(Location.X + ZoneSize / 2.0, Location.Y + ZoneSize / 2.0); }
 
-        public Zone(Point location)
+        public Zone(Point<int> location)
         {
             if (location.X % ZoneSize == 0 && location.Y % ZoneSize == 0)
                 Location = location;
