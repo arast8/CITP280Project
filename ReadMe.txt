@@ -48,6 +48,7 @@ BackgroundLayer.Draw() draws a grid of Tiles, which is the ground of the game wo
 * In WorldView.GetImage(), reset the image to black before starting drawing. For now, this results in black lines showing on the ground, because all images are being blurred when they are drawn.
 * Double Player move speed.
 * Give Player a random initial position close to the origin.
+	* For this feature, create an extension method in RandomExtensions.cs for System.Random objects that returns a random double within a specified range.
 * Create the RandomExtensions static class with an extension method for System.Random that returns a random double within a specified range.
 * In WorldView add the ToWorldLocation() method, which converts a point on the window to a point in the World coordinate system.
 	* Use this method in GameWindow to add a line to the debug text that shows the cursor location.
