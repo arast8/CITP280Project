@@ -13,9 +13,7 @@ namespace CITP280Project
     /// <remarks>
     /// T should be restricted to only numeric types, but I haven't found a way
     /// of doing that yet. As a result, you can put non-numeric structs in X
-    /// and Y, and methods that perform calculations needed to be extension
-    /// methods with specific types used as the type parameter. Those are in
-    /// <see cref="PointExtensions"/>.
+    /// and Y.
     /// </remarks>
     public struct Point<T> where T : struct
     {
@@ -27,28 +25,28 @@ namespace CITP280Project
             X = x;
             Y = y;
         }
-    }
-
-    public static class PointExtensions
-    {
-        /// <summary>
-        /// Returns the distance between this and another Point.
-        /// </summary>
-        public static double DistanceTo(this Point<int> p1, Point<int> p2) => MathHelper.Distance(p1.X, p1.Y, p2.X, p2.Y);
 
         /// <summary>
-        /// Returns the distance between this and another Point.
+        /// Returns the distance between two Points.
         /// </summary>
-        public static double DistanceTo(this Point<int> p1, Point<double> p2) => MathHelper.Distance(p1.X, p1.Y, p2.X, p2.Y);
+        public double DistanceTo<T2>(Point<T2> p2) where T2 : struct
+        {
+            if (this is Point<int> p1Int)
+            {
+                if (p2 is Point<int> p2Int)
+                    return MathHelper.Distance(p1Int.X, p1Int.Y, p2Int.X, p2Int.Y);
+                else if (p2 is Point<double> p2Double)
+                    return MathHelper.Distance(p1Int.X, p1Int.Y, p2Double.X, p2Double.Y);
+            }
+            else if (this is Point<double> p1Double)
+            {
+                if (p2 is Point<int> p2Int)
+                    return MathHelper.Distance(p1Double.X, p1Double.Y, p2Int.X, p2Int.Y);
+                else if (p2 is Point<double> p2Double)
+                    return MathHelper.Distance(p1Double.X, p1Double.Y, p2Double.X, p2Double.Y);
+            }
 
-        /// <summary>
-        /// Returns the distance between this and another Point.
-        /// </summary>
-        public static double DistanceTo(this Point<double> p1, Point<int> p2) => MathHelper.Distance(p1.X, p1.Y, p2.X, p2.Y);
-
-        /// <summary>
-        /// Returns the distance between this and another Point.
-        /// </summary>
-        public static double DistanceTo(this Point<double> p1, Point<double> p2) => MathHelper.Distance(p1.X, p1.Y, p2.X, p2.Y);
+            throw new ArgumentException("Either this or p2 has an unsupported type parameter. Valid type parameters are int and double.");
+        }
     }
 }
