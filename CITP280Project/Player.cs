@@ -16,6 +16,7 @@ namespace CITP280Project
     {
         private Bitmap imgFacingRight;
         private Bitmap imgFacingLeft;
+        private Bitmap currentImage;
         private double moveSpeed = 4; // tiles per second
         private DateTime lastMoveTime;
         private bool isMoving;
@@ -26,11 +27,30 @@ namespace CITP280Project
         private double moveDistance;
         private double vertical;
         private double horizontal;
+        private double radians;
+        private double moveX;
+        private double moveY;
 
+        public readonly object StateChangeLock = new object();
+        // state variables
         public string Name { get; set; }
         public Point<double> Location { get; set; } = new Point<double>(0, 0);
-        public Bitmap CurrentImage { get; private set; }
+        public int Heading { get; set; }
         public double Hunger { get; set; } = 0.75;
+        public bool IsSaved { get; set; }
+
+        public Bitmap CurrentImage
+        {
+            get
+            {
+                if (Heading > 90 && Heading < 270)
+                    currentImage = imgFacingLeft;
+                else if (Heading < 90 || Heading > 270)
+                    currentImage = imgFacingRight;
+
+                return currentImage;
+            }
+        }
 
         public event EventHandler<EventArgs> Moved;
 
@@ -38,7 +58,7 @@ namespace CITP280Project
         {
             imgFacingLeft = Images.PlayerFacingLeft;
             imgFacingRight = Images.PlayerFacingRight;
-            CurrentImage = imgFacingRight;
+            currentImage = imgFacingRight;
         }
 
         public Player(string name) : this()
@@ -49,11 +69,12 @@ namespace CITP280Project
             Location = new Point<double>(rng.NextDouble(-16, 16), rng.NextDouble(-16, 16));
         }
 
-        public Player(string name, Point<double> location, double hunger) : this()
+        public Player(string name, Point<double> location, double hunger, bool isSaved) : this()
         {
             Name = name;
             Location = location;
             Hunger = hunger;
+            IsSaved = isSaved;
         }
 
         public void StartMove()
@@ -84,6 +105,11 @@ namespace CITP280Project
                 if (lastMoveTime != default)
                     moveDistance = moveSpeed * delta.TotalSeconds;
 
+                if (IsKeyDown(KeyMap.Slow))
+                    moveDistance /= 2;
+                else if (IsKeyDown(KeyMap.Fast))
+                    moveDistance *= 1.75;
+
                 vertical = 0;
                 horizontal = 0;
 
@@ -99,15 +125,39 @@ namespace CITP280Project
                 if (IsKeyDown(KeyMap.Right))
                     horizontal += moveDistance;
 
-                Location = new Point<double>(Location.X + horizontal, Location.Y + vertical);
+                if (horizontal != 0 || vertical != 0)
+                {
+                    lock (StateChangeLock)
+                    {
+                        if (horizontal > 0 && vertical == 0)
+                            Heading = 0;
+                        else if (horizontal > 0 && vertical > 0)
+                            Heading = 45;
+                        else if (horizontal == 0 && vertical > 0)
+                            Heading = 90;
+                        else if (horizontal < 0 && vertical > 0)
+                            Heading = 135;
+                        else if (horizontal < 0 && vertical == 0)
+                            Heading = 180;
+                        else if (horizontal < 0 && vertical < 0)
+                            Heading = 225;
+                        else if (horizontal == 0 && vertical < 0)
+                            Heading = 270;
+                        else if (horizontal > 0 && vertical < 0)
+                            Heading = 315;
 
-                if (horizontal > 0)
-                    CurrentImage = imgFacingRight;
-                else if (horizontal < 0)
-                    CurrentImage = imgFacingLeft;
+                        radians = Math.PI / 180 * Heading;
+                        moveX = Math.Cos(radians) * moveDistance;
+                        moveY = Math.Sin(radians) * moveDistance;
+
+                        Location = new Point<double>(Location.X + moveX, Location.Y + moveY);
+                        IsSaved = false;
+                    }
+
+                    Moved?.Invoke(this, new EventArgs());
+                }
 
                 lastMoveTime = now;
-                Moved?.Invoke(this, new EventArgs());
             }
         }
     }

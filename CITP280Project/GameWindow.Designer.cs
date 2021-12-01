@@ -40,7 +40,7 @@ namespace CITP280Project
             // 
             // timerTick
             // 
-            this.timerTick.Interval = 10;
+            this.timerTick.Interval = 1;
             this.timerTick.Tick += new System.EventHandler(this.timerTick_Tick);
             // 
             // lblDebug
@@ -91,6 +91,7 @@ namespace CITP280Project
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.lblDebug);
             this.Controls.Add(this.pnlMenu);

@@ -8,6 +8,29 @@ I plan for it to be a farming game where you search for different plants to grow
 ## Instructions
 After starting the program, click the start button to load the world named "test world" and the player named "test player".
 Use the W, S, A, and D keys to move the player.
+Hold left CTRL to move faster.
+Hold left shift to move slower.
+Scroll the mouse wheel to zoom in and out.
+Exit by closing the window.
+
+## Requirements
+### Part 1
+ * Inheritance: BackgroundLayer, ForegroundLayer, and UILayer inherit from Layer.
+ * Polymorphism: WorldView.Draw() calls .Draw() on each Layer in an array of Layers, and each Layer subclass implements the method differently.
+### Part 2
+ * Files: Images.TryGetBitmap() reads from image files by passing a filename to the Bitmap constructor.
+ * Exception Handling: Images.TryGetBitmap() handles ArgumentExceptions and IOExceptions with a try-catch block.
+ * Interface: IDrawable is an interface and is implemented by Player and Material.
+### Part 3
+ * Database: GameDatabase includes many methods for interacting with a Sqlite database. SQL statements are stored in string constants of the GameDatabase class.
+ * LINQ: World.UnloadFarZones() uses LINQ query syntax to query the World.zones dictionary and loops over the results.
+ * Extension Methods: RandomExtensions.NextDouble() is an extension method for System.Random. PointExtensions.DistanceTo() is an extension method for Point\<T\> (PointExtensions is in Point.cs).
+### Part 4
+ * Generics
+	* Generic Collection: World.zones and World.zonesToLoad are both generic collections. zones is a ConcurrentDictionary\<Point\<int\>, Zone\>, and zonesToLoad is a ConcurrentQueue\<Point\<int\>\>.
+	* Generic class or method: Point\<T\> is a generic struct.
+ * Threading: World.StartLoadingZonesOnDBThread() and World.StartSavingOnDBThread() both create and start a new thread.
+
 
 ## Changelog
 ### 1.0 (Part 1 Implementation Submission)
@@ -19,7 +42,7 @@ The polymorphism requirment is implemented in the Draw() method of the Game clas
 Game.Draw() iterates over an array of Layers and calls Draw() on each of them, which causes it to update and return an image of itself.
 BackgroundLayer.Draw() draws a grid of Tiles, which is the ground of the game world, ForegroundLayer.Draw() draws the character, and UILayer.Draw() draws a hunger bar.
 
-### 2.0 (Part 2 UML Diagram Submission)
+### 2.0
 * Rename Game to GameWindow.
 * Rename Character to Player.
 * Rename Player's Move event to Moved and the KeyboardMove method to Move.
@@ -80,7 +103,7 @@ BackgroundLayer.Draw() draws a grid of Tiles, which is the ground of the game wo
 * Delay filling Zones with random Materials from the Zone constructor to a call to Zone.Init(). This allows the functionality to be skipped when loading from the database.
 * Make WorldView.ToWorldLocation() return PointD instead of PointF. Also round the coordinates in GameWindow.timerTick_Tick() when writing them to lblDebug.
 
-### 3.1 (Part 3 UML Diagram and Implementation Submissions)
+### 3.1 (Part 3 Implementation Submission)
 * Set InterpolationMode to NearestNeighbor and PixelOffsetMode to Half on the Graphics object in WorldView.Resize(). This gets rid of the blurriness and the black grid lines.
 * Draw to a BufferedGraphics object before drawing to the GameWindow (in GameWindow.DrawFrame()). This gets rid of screen-tearing and makes the animation look a lot smoother.
 * Calculate FPS (Frames Per Second) in GameWindow.CalculateFPS() and show the result in the debug Label.
@@ -90,3 +113,23 @@ BackgroundLayer.Draw() draws a grid of Tiles, which is the ground of the game wo
 	* Create the PointExtensions class and its overloaded DistanceTo() extension method in the same file as Point\<T\> (Point.cs). DistanceTo() was easier to implement as extension methods than a normal method, because it depends on Point's type parameter being numeric when it can be any struct.
 	* Use Point\<T\> instead of System.Drawing.Point and System.Windows.Point for Player.Location, Zone.Location, Zone.Center, and World.zones.
 * Remove unnecessary Math.Abs() call in RandomExtensions.NextDouble().
+
+### 4.1 (Part 4 Implementation Submission)
+* Create the GameDatabase class and move SQL strings and methods that access the database from World to GameDatabase.
+* Move some database access to another thread stored in World.dbThread. Two operations take turns executing on it: loading/creating Zones, and saving.
+	* World.StartLoadingZonesOnDBThread() creates and starts World.dbThread executing LoadZones(), which tries to read Zones from the database at the locations in the zonesToLoad queue, creating the Zones they do not exist.
+	* World.StartSavingOnDBThread() creates and starts World.dbThread executing Save(), which saves the World's state to the database.
+	* Change World.zones from a Dictionary to a ConcurrentDictionary to avoid issues with two threads accessing it at the same time.
+* Add a null check in BackgroundLayer.Draw() when it gets a Material, so that it can handle them not being loaded yet. It won't draw anything, and that portion of the screen will be black.
+* Load Zones before they are needed. This helps prevent seeing black areas where Zones are not loaded yet. World.QueueZonesNearPlayer() Adds Zone locations that might be needed to the zonesToLoad queue. The next execution of World.LoadZones(), which runs on another thread, will then either read them from the database or create them.
+* Have WorldView and Layers draw directly to the Graphics object from GameWindow's BufferedGraphics. This eliminates another step in the rendering process and increases performance.
+	* WorldView no longer implements IDrawable and does not have a CurrentImage Bitmap.
+	* In GameWindow, pass the BufferedGraphics's Graphics object to WorldView when creating it and when resizing the window. In WorldView, pass the Graphics object to Layers as a parameter to Layer.Draw().
+* When moving the Player diagonally, move the same distance as when moving horizontally or vertically, instead of moving a greater distance.
+* Store the direction the Player is moving in Player.Heading, and use it in the get accessor for CurrentImage. It is not saved to the database yet. 
+* Use the lock statement in Player.Move() and GameDatabase.UpdatePlayer() to ensure that they can't modify a Player at the same time.
+* Add the ability to zoom in and out with the mouse wheel.
+* Add the ability to move faster by holding left CTRL and slower by holding left shift.
+* Change the interval for GameWindow.timerTick from 10ms to 1ms. In testing, this did not have a significant impact on framerate.
+* Rename Zone.Changed to Zone.IsSaved.
+* Rename WorldView.GetImage() to Draw().

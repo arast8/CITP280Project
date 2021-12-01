@@ -12,23 +12,19 @@ namespace CITP280Project
     /// </summary>
     public class UILayer : Layer
     {
+        private static readonly Font uiFont = new Font(FontFamily.GenericSansSerif, 12);
+        private static readonly StringFormat centeredStringFormat = new StringFormat()
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center,
+        };
         private Rectangle hungerBarRect;
-        private Font uiFont;
-        private StringFormat centeredStringFormat;
 
         public UILayer(WorldView worldView) : base(worldView)
-        {
-            uiFont = new Font(FontFamily.GenericSansSerif, 12);
-            centeredStringFormat = new StringFormat()
-            {
-                Alignment = StringAlignment.Center,
-                LineAlignment = StringAlignment.Center,
-            };
-        }
+        { }
 
-        public override void Draw()
+        public override void Draw(Graphics graphics)
         {
-            Graphics graphics = worldView.Graphics;
             Player player = worldView.Player;
 
             hungerBarRect.Width = 200;

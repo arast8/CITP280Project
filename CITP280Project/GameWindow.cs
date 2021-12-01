@@ -11,7 +11,6 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using static System.Windows.Input.Keyboard;
 using Point = System.Drawing.Point;
-using PointD = System.Windows.Point;
 
 namespace CITP280Project
 {
@@ -29,7 +28,6 @@ namespace CITP280Project
         private BufferedGraphics bufferedGraphics;
 
         // FPS variables
-        private const double DATETIME_TICKS_PER_SECOND = 10_000_000;
         private readonly long[] frameDurations = new long[10];
         private int frameDurationsIndex;
         private long lastFrameTime;
@@ -78,11 +76,11 @@ namespace CITP280Project
 
         private void GameWindow_Resize(object sender, EventArgs e)
         {
-            if (ClientRectangle.Width > 0 && ClientRectangle.Height > 0)
-                worldView.Resize(ClientRectangle.Width, ClientRectangle.Height);
-
             graphics = CreateGraphics();
             bufferedGraphics = BufferedGraphicsManager.Current.Allocate(graphics, ClientRectangle);
+
+            if (ClientRectangle.Width > 0 && ClientRectangle.Height > 0)
+                worldView.SetGraphics(bufferedGraphics.Graphics);
         }
 
         /// <summary>
@@ -96,8 +94,8 @@ namespace CITP280Project
 
             world = new World("test world");
             player = world.CreatePlayer("test player");
-            worldView = new WorldView(world, player, ClientRectangle.Width, ClientRectangle.Height);
-
+            worldView = new WorldView(world, player, bufferedGraphics.Graphics);
+            MouseWheel += GameWindow_MouseWheel;
             timerTick.Start();
         }
 
@@ -124,7 +122,7 @@ namespace CITP280Project
         /// </summary>
         private void DrawFrame()
         {
-            bufferedGraphics.Graphics.DrawImage(worldView.GetImage(), Point.Empty);
+            worldView.Draw();
             bufferedGraphics.Render(graphics);
         }
 
@@ -143,7 +141,7 @@ namespace CITP280Project
                 if (frameDurationsIndex == frameDurations.Length)
                     frameDurationsIndex = 0;
 
-                fps = DATETIME_TICKS_PER_SECOND / frameDurations.Average();
+                fps = TimeSpan.TicksPerSecond / frameDurations.Average();
             }
 
             lastFrameTime = currentFrameTime;
@@ -167,6 +165,14 @@ namespace CITP280Project
 
                 e.Handled = true;
             }
+        }
+
+        private void GameWindow_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Delta > 0)
+                worldView.ZoomIn();
+            else if (e.Delta < 0)
+                worldView.ZoomOut();
         }
 
         private void GameWindow_FormClosing(object sender, FormClosingEventArgs e)

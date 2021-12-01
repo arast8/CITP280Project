@@ -14,11 +14,10 @@ namespace CITP280Project
         public BackgroundLayer(WorldView worldView) : base(worldView)
         { }
 
-        public override void Draw()
+        public override void Draw(Graphics graphics)
         {
             World world = worldView.World;
             CartesianRect visibleArea = worldView.VisibleArea;
-            Graphics graphics = worldView.Graphics;
             int tileSize = worldView.TileSize;
 
             int worldX, worldY, imageX, imageY, worldStartX, worldStartY, imageStartX, imageStartY;
@@ -38,7 +37,8 @@ namespace CITP280Project
                 {
                     material = world.GetGroundMaterial(worldX, worldY);
 
-                    graphics.DrawImage(material.CurrentImage, imageX, imageY, tileSize, tileSize);
+                    if (material != null)
+                        graphics.DrawImage(material.CurrentImage, imageX, imageY, tileSize, tileSize);
                 }
             }
         }

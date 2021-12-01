@@ -19,6 +19,6 @@ namespace CITP280Project
             this.worldView = worldView;
         }
 
-        public abstract void Draw();
+        public abstract void Draw(Graphics graphics);
     }
 }

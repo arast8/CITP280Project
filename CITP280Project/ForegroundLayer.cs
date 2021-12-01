@@ -15,10 +15,9 @@ namespace CITP280Project
         public ForegroundLayer(WorldView worldView) : base(worldView)
         { }
 
-        public override void Draw()
+        public override void Draw(Graphics graphics)
         {
             World world = worldView.World;
-            Graphics graphics = worldView.Graphics;
             CartesianRect visibleArea = worldView.VisibleArea;
             Player player = worldView.Player;
             int tileSize = worldView.TileSize;

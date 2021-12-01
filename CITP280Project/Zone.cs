@@ -18,7 +18,7 @@ namespace CITP280Project
         public Point<int> Location { get; }
         public Material[,] Ground { get; } = new Material[ZoneSize, ZoneSize];
         public Material[,] PlayerLevel { get; } = new Material[ZoneSize, ZoneSize];
-        public bool[,] Changed { get; } = new bool[ZoneSize, ZoneSize];
+        public bool[,] IsSaved { get; } = new bool[ZoneSize, ZoneSize];
         public Biome Biome { get; set; }
         public Point<double> Center { get => new Point<double>(Location.X + ZoneSize / 2.0, Location.Y + ZoneSize / 2.0); }
 

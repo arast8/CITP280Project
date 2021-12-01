@@ -16,5 +16,7 @@ namespace CITP280Project
         public static Key Down = Key.S;
         public static Key Left = Key.A;
         public static Key Right = Key.D;
+        public static Key Slow = Key.LeftShift;
+        public static Key Fast = Key.LeftCtrl;
     }
 }

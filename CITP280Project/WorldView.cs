@@ -14,19 +14,22 @@ namespace CITP280Project
     /// WorldView is responsible for creating an image of a World to show the user.
     /// It is composed of different Layers, which draw different types of game visuals.
     /// </summary>
-    public class WorldView : IDrawable
+    public class WorldView
     {
-        private Layer[] layers;
-        private CartesianRect visibleArea;
+        private const int TILE_SIZE_MAX = 150;
+        private const int TILE_SIZE_MIN = 30;
+        private const int TILE_SIZE_STEP = 10;
 
-        public Bitmap CurrentImage { get; set; }
+        private readonly Layer[] layers;
+        private CartesianRect visibleArea;
+        private Graphics graphics;
+
         public Player Player { get; set; }
-        public Graphics Graphics { get; private set; }
         public CartesianRect VisibleArea { get => visibleArea; }
         public World World { get; private set; }
         public int TileSize { get; private set; } = 80; // pixels
 
-        public WorldView(World world, Player player, int width, int height)
+        public WorldView(World world, Player player, Graphics graphics)
         {
             World = world;
             Player = player;
@@ -37,32 +40,33 @@ namespace CITP280Project
                 new UILayer(this),
             };
 
-            Resize(width, height);
+            SetGraphics(graphics);
 
             player.Moved += Player_Moved;
         }
 
-        public Bitmap GetImage()
+        public void Draw()
         {
-            Graphics.Clear(Color.Black);
+            graphics.Clear(Color.Black);
 
             foreach (Layer layer in layers)
-                layer.Draw();
-
-            return CurrentImage;
+                layer.Draw(graphics);
         }
 
-        public void Resize(int width, int height)
+        public void SetGraphics(Graphics graphics)
         {
-            CurrentImage?.Dispose();
-            Graphics?.Dispose();
-            CurrentImage = new Bitmap(width, height);
-            Graphics = Graphics.FromImage(CurrentImage);
-            Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-            Graphics.PixelOffsetMode = PixelOffsetMode.Half;
+            this.graphics = graphics;
 
-            visibleArea.Width = (double)width / TileSize;
-            visibleArea.Height = (double)height / TileSize;
+            graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+            graphics.PixelOffsetMode = PixelOffsetMode.Half;
+
+            CalculateVisibleArea();
+        }
+
+        private void CalculateVisibleArea()
+        {
+            visibleArea.Width = (double)graphics.VisibleClipBounds.Width / TileSize;
+            visibleArea.Height = (double)graphics.VisibleClipBounds.Height / TileSize;
             visibleArea.X = Player.Location.X - visibleArea.Width / 2;
             visibleArea.Y = Player.Location.Y - visibleArea.Height / 2;
         }
@@ -76,11 +80,27 @@ namespace CITP280Project
         /// <summary>
         /// Converts coordinates on GameWindow to World coordinates.
         /// </summary>
-        public PointD ToWorldLocation(Point locationOnWindow)
+        public Point<double> ToWorldLocation(Point locationOnWindow)
         {
-            return new PointD(
+            return new Point<double>(
                 visibleArea.Left + locationOnWindow.X / (double)TileSize,
                 visibleArea.Top - locationOnWindow.Y / (double)TileSize);
+        }
+
+        public void ZoomIn()
+        {
+            if (TileSize + TILE_SIZE_STEP <= TILE_SIZE_MAX)
+                TileSize += TILE_SIZE_STEP;
+
+            CalculateVisibleArea();
+        }
+
+        public void ZoomOut()
+        {
+            if (TileSize - TILE_SIZE_STEP >= TILE_SIZE_MIN)
+                TileSize -= TILE_SIZE_STEP;
+
+            CalculateVisibleArea();
         }
     }
 }
