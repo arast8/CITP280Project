@@ -71,7 +71,7 @@ namespace CITP280Project
             visibleArea.Y = Player.Location.Y - visibleArea.Height / 2;
         }
 
-        private void Player_Moved(object sender, EventArgs e)
+        private void Player_Moved(object sender, Point<double> location, int heading)
         {
             visibleArea.X = Player.Location.X - visibleArea.Width / 2;
             visibleArea.Y = Player.Location.Y - visibleArea.Height / 2;

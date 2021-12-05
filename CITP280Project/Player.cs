@@ -52,7 +52,12 @@ namespace CITP280Project
             }
         }
 
-        public event EventHandler<EventArgs> Moved;
+        private MovedEventHandler movedDelegate;
+        public event MovedEventHandler Moved
+        {
+            add => movedDelegate += value;
+            remove => movedDelegate -= value;
+        }
 
         public Player()
         {
@@ -154,7 +159,7 @@ namespace CITP280Project
                         IsSaved = false;
                     }
 
-                    Moved?.Invoke(this, new EventArgs());
+                    movedDelegate?.Invoke(this, Location, Heading);
                 }
 
                 lastMoveTime = now;

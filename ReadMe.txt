@@ -30,7 +30,10 @@ Exit by closing the window.
 	* Generic Collection: World.zones and World.zonesToLoad are both generic collections. zones is a ConcurrentDictionary\<Point\<int\>, Zone\>, and zonesToLoad is a ConcurrentQueue\<Point\<int\>\>.
 	* Generic class or method: Point\<T\> is a generic struct.
  * Threading: World.StartLoadingZonesOnDBThread() and World.StartSavingOnDBThread() both create and start a new thread.
-
+### Part 5
+* Delegate: MovedEventHandler is a type of delegate. Player.movedDelegate is an instance of this delegate type and is used as a backend for the Player.Moved event.
+* Event: Player.Moved is an event, and WorldView subscribes to it with WorldView.Player_Moved().
+* Constructors: There are many constructors. One good example is the Player constructors, where the overloaded ones call the parameterless one using ": this()". Another example is the BackgroundLayer, ForegroundLayer, and UILayer constructors, which call the Layer constructor using ": base()".
 
 ## Changelog
 ### 1.0 (Part 1 Implementation Submission)
@@ -133,3 +136,8 @@ BackgroundLayer.Draw() draws a grid of Tiles, which is the ground of the game wo
 * Change the interval for GameWindow.timerTick from 10ms to 1ms. In testing, this did not have a significant impact on framerate.
 * Rename Zone.Changed to Zone.IsSaved.
 * Rename WorldView.GetImage() to Draw().
+
+### 5.0
+* Define the MovedEventHandler delegate in MovedEventHandler.cs.
+* Use a delegate of type MovedEventHandler as the backend for the Player.Moved event.
+	* Redo the parameters of WorldView.Player_Moved() to match MovedEventHandler.

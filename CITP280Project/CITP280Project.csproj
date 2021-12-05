@@ -83,6 +83,7 @@
     <Compile Include="Biome.cs" />
     <Compile Include="GameDatabase.cs" />
     <Compile Include="Images.cs" />
+    <Compile Include="MovedEventHandler.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Material.cs" />
     <Compile Include="Point.cs" />
