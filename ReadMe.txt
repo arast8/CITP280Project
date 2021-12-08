@@ -3,7 +3,7 @@
 ## Description
 This is a game in which the player moves a character across a flat, two-dimensional world.
 However, it is very unfinished.
-I plan for it to be a farming game where you search for different plants to grow, but the only thing you can do so far is move around.
+I plan for it to be a farming game where you search for different plants to grow.
 
 ## Instructions
 After starting the program, click the start button to load the world named "test world" and the player named "test player".
@@ -11,6 +11,9 @@ Use the W, S, A, and D keys to move the player.
 Hold left CTRL to move faster.
 Hold left shift to move slower.
 Scroll the mouse wheel to zoom in and out.
+Left click to dig a material and place it in the inventory.
+Rickt click to place a material from the inventory.
+Click the hotbar to change the selected material.
 Exit by closing the window.
 
 ## Requirements
@@ -137,7 +140,21 @@ BackgroundLayer.Draw() draws a grid of Tiles, which is the ground of the game wo
 * Rename Zone.Changed to Zone.IsSaved.
 * Rename WorldView.GetImage() to Draw().
 
-### 5.0
+### 5.0 (Part 5 Implementation Submission)
 * Define the MovedEventHandler delegate in MovedEventHandler.cs.
 * Use a delegate of type MovedEventHandler as the backend for the Player.Moved event.
 	* Redo the parameters of WorldView.Player_Moved() to match MovedEventHandler.
+
+### 5.1
+* Add a player inventory and let the player gather materials from and place them into the world.
+	* Draw the inventory in UILayer.Draw(), and reposition the hunger bar from where it was drawn before.
+	* Pass click events from GameWindow to WorldView, where WorldView passes them to each of its Layers, in reverse order, until the event is handled.
+	* In UILayer.HandleClick(), change the selected inventory slot if it was clicked on.
+	* In ForegroundLayer.HandleClick(), get or set the player-level Material.
+	* In BackgroundLayer.HandleClick(), get or set the ground Material.
+	* Add CanBeGround and CanBePlayerLevel properties to Material to restrict where certain Materials can be placed.
+	* The player's inventory is stored in the Inventories table, but is saved and loaded at the same time as the player.
+* Save and load Player.Heading from the database.
+* Add an image for the Unknown Material.
+* Remove the Images.Total constant because it can be calculated from Successes and Errors.
+* Fix Zones and Materials not being saved.

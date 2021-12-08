@@ -38,11 +38,11 @@ namespace CITP280Project
         {
             InitializeComponent();
 
-            lblLoading.Text = $"Loading {Images.COUNT} Images...";
+            lblLoading.Text = $"Loading Images...";
 
             Images.Initialize();
 
-            lblLoading.Text = $"Loaded {Images.Successes}/{Images.COUNT} Images.";
+            lblLoading.Text = $"Loaded {Images.Successes}/{Images.Successes + Images.Errors} Images.";
 
             if (Images.Errors == 0)
             {
@@ -204,6 +204,11 @@ namespace CITP280Project
                     MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void GameWindow_MouseClick(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            worldView?.HandleClick(e);
         }
     }
 }

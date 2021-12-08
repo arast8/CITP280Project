@@ -152,8 +152,7 @@ namespace CITP280Project
                         where player.Location.DistanceTo(pair.Value.Center) > ZONE_UNLOAD_DISTANCE
                         select pair.Key;
 
-            // Calling .toArray() on query avoids modifying the collection on which the query is executing.
-            foreach (Point<int> location in query.ToArray())
+            foreach (Point<int> location in query)
                 zones.TryRemove(location, out var _);
         }
 
@@ -192,9 +191,8 @@ namespace CITP280Project
             else
                 return null;
         }
-
-        public Material GetGroundMaterial(Point<int> location) => GetGroundMaterial(location.X, location.Y);
-        public Material GetGroundMaterial(float x, float y) => GetGroundMaterial(Convert.ToInt32(Math.Floor(x)), Convert.ToInt32(Math.Floor(y)));
+        public Material GetGroundMaterial(Point<double> location) =>
+            GetGroundMaterial(Convert.ToInt32(Math.Floor(location.X)), Convert.ToInt32(Math.Floor(location.Y)));
 
         /// <summary>
         /// Returns the Material above the ground at the specified x and y coordinates.
@@ -206,6 +204,52 @@ namespace CITP280Project
             else
                 return null;
         }
+        public Material GetPlayerLevelMaterial(Point<double> location) =>
+            GetPlayerLevelMaterial(Convert.ToInt32(Math.Floor(location.X)), Convert.ToInt32(Math.Floor(location.Y)));
+
+        /// <summary>
+        /// Sets the ground Material at the specified x and y coordinates.
+        /// </summary>
+        /// <returns>Whether the ground Material was set</returns>
+        public bool SetGroundMaterial(int x, int y, Material material)
+        {
+            if (TryGetZone(x, y, out var zone) && (material == null || material.CanBeGround))
+            {
+                var zoneX = x - zone.Location.X;
+                var zoneY = y - zone.Location.Y;
+
+                zone.Ground[zoneX, zoneY] = material;
+                zone.IsSaved[zoneX, zoneY] = false;
+
+                return true;
+            }
+
+            return false;
+        }
+        public bool SetGroundMaterial(Point<double> location, Material material) =>
+            SetGroundMaterial(Convert.ToInt32(Math.Floor(location.X)), Convert.ToInt32(Math.Floor(location.Y)), material);
+
+        /// <summary>
+        /// Sets the player level Material at the specified x and y coordinates.
+        /// </summary>
+        /// <returns>Whether the player level Material was set</returns>
+        public bool SetPlayerLevelMaterial(int x, int y, Material material)
+        {
+            if (TryGetZone(x, y, out var zone) && (material == null || material.CanBePlayerLevel))
+            {
+                var zoneX = x - zone.Location.X;
+                var zoneY = y - zone.Location.Y;
+
+                zone.PlayerLevel[zoneX, zoneY] = material;
+                zone.IsSaved[zoneX, zoneY] = false;
+
+                return true;
+            }
+
+            return false;
+        }
+        public bool SetPlayerLevelMaterial(Point<double> location, Material material) =>
+            SetPlayerLevelMaterial(Convert.ToInt32(Math.Floor(location.X)), Convert.ToInt32(Math.Floor(location.Y)), material);
 
         public void Dispose()
         {
@@ -242,6 +286,8 @@ namespace CITP280Project
                     newZone.Init();
 
                     zones[location] = newZone;
+
+                    db.InsertZone(newZone);
                 }
             }
         }

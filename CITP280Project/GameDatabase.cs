@@ -23,7 +23,9 @@ namespace CITP280Project
                 Name TEXT,
                 X NUM,
                 Y NUM,
+                Heading INT,
                 Hunger NUM,
+                InventoryID INT,
                 PRIMARY KEY (NAME))";
         private const string CREATE_ZONES_TABLE_QUERY =
             @"CREATE TABLE Zones (
@@ -31,15 +33,25 @@ namespace CITP280Project
                 Y INT,
                 Biome TEXT,
                 PRIMARY KEY (X, Y))";
+        private const string CREATE_INVENTORIES_QUERY =
+        // Slot is the index of the Material in the inventory array.
+            @"CREATE TABLE Inventories (
+                ID INT,
+                Slot INT,
+                Material TEXT,
+                PRIMARY KEY (ID, Slot))";
         private const string INSERT_MATERIAL_QUERY =
             @"INSERT INTO Materials (X, Y, Ground, PlayerLevel)
             Values(@x, @y, @ground, @playerLevel)";
         private const string INSERT_PLAYER_QUERY =
-            @"INSERT INTO Players (X, Y, Name, Hunger)
-            VALUES(@x, @y, @name, @hunger)";
+            @"INSERT INTO Players (X, Y, Name, Heading, Hunger, InventoryID)
+            VALUES(@x, @y, @name, @heading, @hunger, @inventoryID)";
         private const string INSERT_ZONE_QUERY =
             @"INSERT INTO Zones (X, Y, Biome)
             Values(@x, @y, @biome)";
+        private const string INSERT_INVENTORY_QUERY =
+            @"INSERT INTO Inventories (ID, Slot, Material)
+            Values(@id, @slot, @material)";
         private const string UPDATE_MATERIAL_QUERY =
             @"UPDATE Materials
             SET Ground = @ground,
@@ -47,8 +59,12 @@ namespace CITP280Project
             WHERE X == @x AND Y == @y";
         private const string UPDATE_PLAYER_QUERY =
             @"UPDATE Players
-            SET X = @x, Y = @y, Hunger = @hunger
+            SET X = @x, Y = @y, Heading = @heading, Hunger = @hunger
             WHERE Name = @name";
+        private const string UPDATE_INVENTORY_QUERY =
+            @"UPDATE Inventories
+            SET Material = @material
+            WHERE ID = @id AND Slot = @slot";
         private const string SELECT_MATERIALS_QUERY =
             @"SELECT *
             FROM Materials
@@ -62,6 +78,14 @@ namespace CITP280Project
             @"SELECT *
             FROM Zones
             WHERE X = @x AND Y = @y";
+        private const string SELECT_INVENTORY_QUERY =
+            @"SELECT *
+            FROM Inventories
+            WHERE ID = @id";
+        private const string SELECT_HIGHEST_INVENTORY_ID =
+            @"SELECT DISTINCT ID
+            FROM Inventories
+            ORDER BY ID DESC";
 
         private SqliteConnection connection;
         private string worldsDirName = "Worlds";
@@ -73,7 +97,6 @@ namespace CITP280Project
 
             OpenDB();
         }
-
 
         /// <summary>
         /// Opens the SQLite database for this world for read/write, creating the parent directory,
@@ -116,6 +139,9 @@ namespace CITP280Project
                 command.CommandText = CREATE_ZONES_TABLE_QUERY;
                 command.ExecuteNonQuery();
 
+                command.CommandText = CREATE_INVENTORIES_QUERY;
+                command.ExecuteNonQuery();
+
                 transaction.Commit();
             }
         }
@@ -127,14 +153,49 @@ namespace CITP280Project
         {
             if (player != null)
             {
-                using (var command = new SqliteCommand(INSERT_PLAYER_QUERY, connection))
+                using (var transaction = connection.BeginTransaction())
                 {
-                    command.Parameters.Add("@x", SqliteType.Integer).Value = player.Location.X;
-                    command.Parameters.Add("@y", SqliteType.Integer).Value = player.Location.Y;
-                    command.Parameters.Add("@name", SqliteType.Integer).Value = player.Name;
-                    command.Parameters.Add("@hunger", SqliteType.Integer).Value = player.Hunger;
+                    using (var command = new SqliteCommand(SELECT_HIGHEST_INVENTORY_ID, connection, transaction))
+                    {
+                        var reader = command.ExecuteReader();
 
-                    command.ExecuteNonQuery();
+                        if (reader.Read())
+                            player.InventoryID = reader.GetInt32(reader.GetOrdinal("ID")) + 1;
+                        else
+                            player.InventoryID = 0;
+                    }
+
+                    using (var command = new SqliteCommand(INSERT_PLAYER_QUERY, connection, transaction))
+                    {
+                        command.Parameters.Add("@x", SqliteType.Integer).Value = player.Location.X;
+                        command.Parameters.Add("@y", SqliteType.Integer).Value = player.Location.Y;
+                        command.Parameters.Add("@name", SqliteType.Text).Value = player.Name;
+                        command.Parameters.Add("@heading", SqliteType.Integer).Value = player.Heading;
+                        command.Parameters.Add("@hunger", SqliteType.Real).Value = player.Hunger;
+                        command.Parameters.Add("@inventoryID", SqliteType.Integer).Value = player.InventoryID;
+
+                        command.ExecuteNonQuery();
+                    }
+
+                    using (var command = new SqliteCommand(INSERT_INVENTORY_QUERY, connection, transaction))
+                    {
+                        for (int i = 0; i < player.Inventory.Length; i++)
+                        {
+                            command.Parameters.Clear();
+
+                            command.Parameters.Add("@id", SqliteType.Integer).Value = player.InventoryID;
+                            command.Parameters.Add("@slot", SqliteType.Integer).Value = i;
+
+                            object materialName = player.Inventory[i]?.Name;
+                            if (materialName == null)
+                                materialName = DBNull.Value;
+                            command.Parameters.Add("@material", SqliteType.Text).Value = materialName;
+
+                            command.ExecuteNonQuery();
+                        }
+                    }
+
+                    transaction.Commit();
                 }
             }
         }
@@ -166,12 +227,7 @@ namespace CITP280Project
                             command.Parameters.Add("@x", SqliteType.Integer).Value = zone.Location.X + x;
                             command.Parameters.Add("@y", SqliteType.Integer).Value = zone.Location.Y + y;
                             command.Parameters.Add("@ground", SqliteType.Text).Value = zone.Ground[x, y]?.Name;
-                            string playerLevelName = zone.PlayerLevel[x, y]?.Name ?? null;
-
-                            if (playerLevelName == null)
-                                command.Parameters.Add("@playerLevel", SqliteType.Text).Value = DBNull.Value;
-                            else
-                                command.Parameters.Add("@playerLevel", SqliteType.Text).Value = playerLevelName;
+                            command.Parameters.Add("@playerLevel", SqliteType.Text).Value = DBNullify(zone.PlayerLevel[x, y]?.Name);
 
                             command.ExecuteNonQuery();
                         }
@@ -197,11 +253,11 @@ namespace CITP280Project
                     {
                         for (int y = 0; y < Zone.ZoneSize; y++)
                         {
-                            if (zone.IsSaved[x, y])
+                            if (!zone.IsSaved[x, y])
                             {
                                 command.Parameters.Clear();
-                                command.Parameters.Add("@ground", SqliteType.Text).Value = zone.Ground[x, y].Name;
-                                command.Parameters.Add("@playerLevel", SqliteType.Text).Value = zone.PlayerLevel[x, y].Name;
+                                command.Parameters.Add("@ground", SqliteType.Text).Value = DBNullify(zone.Ground[x, y]?.Name);
+                                command.Parameters.Add("@playerLevel", SqliteType.Text).Value = DBNullify(zone.PlayerLevel[x, y]?.Name);
                                 command.Parameters.Add("@x", SqliteType.Integer).Value = zone.Location.X + x;
                                 command.Parameters.Add("@y", SqliteType.Integer).Value = zone.Location.Y + y;
 
@@ -223,18 +279,38 @@ namespace CITP280Project
         {
             if (player != null && !player.IsSaved)
             {
-
-                using (var command = new SqliteCommand(UPDATE_PLAYER_QUERY, connection))
+                lock (player.StateChangeLock)
                 {
-                    lock (player.StateChangeLock)
+                    using (var transaction = connection.BeginTransaction())
                     {
-                        command.Parameters.Add("@name", SqliteType.Text).Value = player.Name;
-                        command.Parameters.Add("@x", SqliteType.Real).Value = player.Location.X;
-                        command.Parameters.Add("@y", SqliteType.Real).Value = player.Location.Y;
-                        command.Parameters.Add("@hunger", SqliteType.Real).Value = player.Hunger;
-                    }
+                        using (var command = new SqliteCommand(UPDATE_PLAYER_QUERY, connection, transaction))
+                        {
+                            command.Parameters.Add("@name", SqliteType.Text).Value = player.Name;
+                            command.Parameters.Add("@x", SqliteType.Real).Value = player.Location.X;
+                            command.Parameters.Add("@y", SqliteType.Real).Value = player.Location.Y;
+                            command.Parameters.Add("@heading", SqliteType.Integer).Value = player.Heading;
+                            command.Parameters.Add("@hunger", SqliteType.Real).Value = player.Hunger;
 
-                    command.ExecuteNonQuery();
+
+                            command.ExecuteNonQuery();
+                        }
+
+                        using (var command = new SqliteCommand(UPDATE_INVENTORY_QUERY, connection, transaction))
+                        {
+                            for (int i = 0; i < player.Inventory.Length; i++)
+                            {
+                                command.Parameters.Clear();
+
+                                command.Parameters.Add("@id", SqliteType.Integer).Value = player.InventoryID;
+                                command.Parameters.Add("@slot", SqliteType.Integer).Value = i;
+                                command.Parameters.Add("@material", SqliteType.Text).Value = DBNullify(player.Inventory[i]?.Name);
+
+                                command.ExecuteNonQuery();
+                            }
+                        }
+
+                        transaction.Commit();
+                    }
                 }
             }
         }
@@ -257,21 +333,48 @@ namespace CITP280Project
                 {
                     if (reader.Read())
                     {
-                        var location = new Point<double>(
+                        Point<double> location = new Point<double>(
                             reader.GetDouble(reader.GetOrdinal("X")),
-                            reader.GetDouble(reader.GetOrdinal("Y"))
-                        );
-                        var hunger = reader.GetDouble(reader.GetOrdinal("Hunger"));
+                            reader.GetDouble(reader.GetOrdinal("Y")));
+                        int heading = reader.GetInt32(reader.GetOrdinal("Heading"));
+                        double hunger = reader.GetDouble(reader.GetOrdinal("Hunger"));
+                        int inventoryID = reader.GetInt32(reader.GetOrdinal("InventoryID"));
 
-                        savedPlayer = new Player(name, location, hunger, true);
-                        return true;
+                        savedPlayer = new Player(name, location, heading, hunger, inventoryID);
                     }
                     else
                     {
                         savedPlayer = null;
-                        return false;
                     }
                 }
+            }
+
+            if (savedPlayer != null)
+            {
+                using (var command = new SqliteCommand(SELECT_INVENTORY_QUERY, connection))
+                {
+                    command.Parameters.Add("@id", SqliteType.Integer).Value = savedPlayer.InventoryID;
+
+                    var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        savedPlayer.InventoryID = reader.GetInt32(reader.GetOrdinal("ID"));
+                        int slot = reader.GetInt32(reader.GetOrdinal("Slot"));
+                        string materialName =
+                            reader.IsDBNull(reader.GetOrdinal("Material")) ?
+                            null : reader.GetString(reader.GetOrdinal("Material"));
+                        Material material = Material.GetMaterial(materialName);
+
+                        savedPlayer.Inventory[slot] = material;
+                    }
+                }
+
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 
@@ -328,11 +431,9 @@ namespace CITP280Project
                             int absY = reader.GetInt32(reader.GetOrdinal("Y"));
                             int relY = absY - savedZone.Location.Y;
                             string ground = reader.GetString(reader.GetOrdinal("Ground"));
-
                             string playerLevel =
-                                reader.IsDBNull(reader.GetOrdinal("PlayerLevel"))
-                                ? null
-                                : reader.GetString(reader.GetOrdinal("PlayerLevel"));
+                                reader.IsDBNull(reader.GetOrdinal("PlayerLevel")) ?
+                                null : reader.GetString(reader.GetOrdinal("PlayerLevel"));
 
                             savedZone.Ground[relX, relY] = Material.GetMaterial(ground);
                             savedZone.PlayerLevel[relX, relY] = Material.GetMaterial(playerLevel);
@@ -347,6 +448,14 @@ namespace CITP280Project
                     return false;
                 }
             }
+        }
+
+        private object DBNullify(object input)
+        {
+            if (input == null)
+                return DBNull.Value;
+
+            return input;
         }
 
         public void Dispose()

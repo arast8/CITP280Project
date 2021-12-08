@@ -11,7 +11,6 @@ namespace CITP280Project
     public static class Images
     {
         private const string PATH_TO_IMAGES = "../../Resources/";
-        public const int COUNT = 6;
         private static Random rng = new Random();
 
         public static Bitmap Unknown { get; private set; }
@@ -34,8 +33,7 @@ namespace CITP280Project
         /// </summary>
         public static void Initialize()
         {
-            Unknown = new Bitmap(1, 1);
-
+            Unknown = TryGetBitmap("Unknown.png");
             Dirt = TryGetBitmap("Dirt.png");
             Stone = TryGetBitmap("Stone.png");
             PlayerFacingRight = TryGetBitmap("Player.png");

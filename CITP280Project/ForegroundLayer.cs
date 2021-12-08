@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace CITP280Project
 {
@@ -55,6 +56,38 @@ namespace CITP280Project
                         graphics.DrawImage(material.CurrentImage, imageX, imageY, tileSize, tileSize);
                 }
             }
+        }
+
+        public override bool HandleClick(MouseEventArgs e)
+        {
+            var worldLocation = worldView.ToWorldLocation(e.Location);
+            var player = worldView.Player;
+            var world = worldView.World;
+
+            if (e.Button == MouseButtons.Left)
+            { // dig player-level material
+                var playerLevelMaterial = world.GetPlayerLevelMaterial(worldLocation);
+
+                if (playerLevelMaterial != null && playerLevelMaterial.CanBePlayerLevel)
+                {
+                    player.Inventory[player.SelectedInventoryIndex] = playerLevelMaterial;
+                    world.SetPlayerLevelMaterial(worldLocation, null);
+                    return true;
+                }
+            }
+            else if (e.Button == MouseButtons.Right)
+            { // place player-level material
+                var inventoryMaterial = player.Inventory[player.SelectedInventoryIndex];
+                var groundMaterial = world.GetGroundMaterial(worldLocation);
+
+                if (inventoryMaterial != null && inventoryMaterial.CanBePlayerLevel && groundMaterial != null)
+                {
+                    world.SetPlayerLevelMaterial(worldLocation, inventoryMaterial);
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

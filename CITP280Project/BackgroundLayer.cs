@@ -42,5 +42,36 @@ namespace CITP280Project
                 }
             }
         }
+
+        public override bool HandleClick(MouseEventArgs e)
+        {
+            var worldLocation = worldView.ToWorldLocation(e.Location);
+            var player = worldView.Player;
+            var world = worldView.World;
+
+            if (e.Button == MouseButtons.Left)
+            { // dig ground material
+                var material = world.GetGroundMaterial(worldLocation);
+
+                if (material != null && material.CanBeGround)
+                {
+                    player.Inventory[player.SelectedInventoryIndex] = material;
+                    world.SetGroundMaterial(worldLocation, null);
+                    return true;
+                }
+            }
+            else if (e.Button == MouseButtons.Right)
+            { // place ground material
+                var material = player.Inventory[player.SelectedInventoryIndex];
+
+                if (material != null && material.CanBeGround)
+                {
+                    world.SetGroundMaterial(worldLocation, material);
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

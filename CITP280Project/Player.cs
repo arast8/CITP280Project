@@ -14,6 +14,7 @@ namespace CITP280Project
     /// </summary>
     public class Player : IDrawable
     {
+        public const int INVENTORY_LENGTH = 8;
         private Bitmap imgFacingRight;
         private Bitmap imgFacingLeft;
         private Bitmap currentImage;
@@ -37,6 +38,9 @@ namespace CITP280Project
         public Point<double> Location { get; set; } = new Point<double>(0, 0);
         public int Heading { get; set; }
         public double Hunger { get; set; } = 0.75;
+        public Material[] Inventory { get; } = new Material[INVENTORY_LENGTH];
+        public int SelectedInventoryIndex { get; set; }
+        public int InventoryID { get; set; }
         public bool IsSaved { get; set; }
 
         public Bitmap CurrentImage
@@ -59,13 +63,17 @@ namespace CITP280Project
             remove => movedDelegate -= value;
         }
 
-        public Player()
+        private Player()
         {
             imgFacingLeft = Images.PlayerFacingLeft;
             imgFacingRight = Images.PlayerFacingRight;
             currentImage = imgFacingRight;
         }
 
+        /// <summary>
+        /// Creates a new player.
+        /// </summary>
+        /// <param name="name"></param>
         public Player(string name) : this()
         {
             Name = name;
@@ -74,12 +82,17 @@ namespace CITP280Project
             Location = new Point<double>(rng.NextDouble(-16, 16), rng.NextDouble(-16, 16));
         }
 
-        public Player(string name, Point<double> location, double hunger, bool isSaved) : this()
+        /// <summary>
+        /// Initializes a player with all state data sets IsSaved to true.
+        /// </summary>
+        public Player(string name, Point<double> location, int heading, double hunger, int inventoryID) : this()
         {
             Name = name;
             Location = location;
+            Heading = heading;
             Hunger = hunger;
-            IsSaved = isSaved;
+            InventoryID = inventoryID;
+            IsSaved = true;
         }
 
         public void StartMove()

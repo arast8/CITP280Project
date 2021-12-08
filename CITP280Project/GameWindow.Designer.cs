@@ -101,6 +101,7 @@ namespace CITP280Project
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.GameWindow_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.GameWindow_KeyUp);
             this.Layout += new System.Windows.Forms.LayoutEventHandler(this.GameWindow_Layout);
+            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.GameWindow_MouseClick);
             this.Resize += new System.EventHandler(this.GameWindow_Resize);
             this.pnlMenu.ResumeLayout(false);
             this.pnlMenu.PerformLayout();

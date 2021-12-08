@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Point = System.Drawing.Point;
 using PointD = System.Windows.Point;
 
@@ -101,6 +102,13 @@ namespace CITP280Project
                 TileSize -= TILE_SIZE_STEP;
 
             CalculateVisibleArea();
+        }
+
+        public void HandleClick(MouseEventArgs e)
+        {
+            for (int i = layers.Length - 1; i > -1; i--)
+                if (layers[i].HandleClick(e))
+                    break;
         }
     }
 }
