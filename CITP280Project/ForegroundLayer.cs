@@ -28,7 +28,6 @@ namespace CITP280Project
             int playerImageY = Convert.ToInt32(graphics.VisibleClipBounds.Height / 2.0 - tileSize / 2.0);
             bool playerIsDrawn = false;
 
-
             int worldX, worldY, imageX, imageY, worldStartX, worldStartY, imageStartX, imageStartY;
             Material material;
 
