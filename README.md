@@ -2,8 +2,11 @@
 
 ## Description
 This is a game in which the player moves a character across a flat, two-dimensional world.
-However, it is very unfinished.
-I plan for it to be a farming game where you search for different plants to grow.
+I planned for it to be a farming game where you search for different plants to grow.
+However, it is unfinished.
+I created this app for Advanced C#.NET Programming class (CITP 280) at Lansing Community College.
+This project was completed in five parts and had to use certain C# and .NET programming features, which are listed in the [Requirements](#requirements) section.
+In addition, I was required to keep a [changelog](#changelog) and create UML class diagrams. See the "UML Class Diagram" folder for the diagrams.
 
 ## Instructions
 After starting the program, click the start button to load the world named "test world" and the player named "test player".
@@ -11,7 +14,7 @@ Use the W, S, A, and D keys to move the player.
 Hold left CTRL to move faster.
 Hold left shift to move slower.
 Scroll the mouse wheel to zoom in and out.
-Left click to dig a material and place it in the inventory.
+Left click to dig a material and put it in the inventory.
 Rickt click to place a material from the inventory.
 Click the hotbar to change the selected material.
 Exit by closing the window.
